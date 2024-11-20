@@ -1,0 +1,42 @@
+import { LangTranslationKey } from "@/enums"
+
+export default {
+	name: "America",
+	iconSrc: "/svg/langFlags/america-flag.svg",
+	translations: {
+		[LangTranslationKey.WEBSITE_NAME]: "Cards Hub",
+		[LangTranslationKey.NEW_CHANNEL]: "New Channel",
+		[LangTranslationKey.LANGUAGE]: "Language",
+		[LangTranslationKey.THEME]: "Theme",
+		[LangTranslationKey.PAGE_NOT_FOUND]: "Page Not Found",
+		// JOGOS
+		[LangTranslationKey.OLHO]: "President",
+		[LangTranslationKey.LOGGED_IN]: "Logged in as: ",
+		[LangTranslationKey.LOGGED_OUT]: "Logged out",
+		[LangTranslationKey.ROOM_NAME]: "Room Name",
+		[LangTranslationKey.GAME]: "Game",
+		[LangTranslationKey.PLAYER_COUNT]: "Player Count",
+		[LangTranslationKey.LOBBY_TABLE_CAPTION]: "Create, Delete, or Join a Game Room!",
+		[LangTranslationKey.CREATE_GAME_ROOM]: "Create Game Room",
+		[LangTranslationKey.CREATE_ROOM_DIALOG_DESCRIPTION]: "Choose a Name and a type for your new game room",
+		[LangTranslationKey.CLOSE]: "Close",
+		[LangTranslationKey.CHOOSE_YOUR_USERNAME]: "Choose your Username",
+		[LangTranslationKey.USERNAME_DIALOG_DESCRIPTION]: "The Username will be used to identify you",
+		[LangTranslationKey.USER_NAME]: "Username",
+		[LangTranslationKey.CREATE_USER]: "Create Username",
+		[LangTranslationKey.STATE]: "State",
+		[LangTranslationKey.IDLE]: "Idle",
+		[LangTranslationKey.ONGOING]: "Ongoing",
+		[LangTranslationKey.PASSED]: "Passed",
+		[LangTranslationKey.WAITING]: "On Hold",
+		[LangTranslationKey.PLAYING]: "Playing",
+		[LangTranslationKey.PRESIDENT]: "President",
+		[LangTranslationKey.VICEPRESIDENT]: "Vice-President",
+		[LangTranslationKey.NEUTRAL]: "Neutral",
+		[LangTranslationKey.VICEOLHO]: "Vice-Olho",
+		[LangTranslationKey.FINNISHED]: "Finnished",
+		[LangTranslationKey.LEFTROOM]: "Left Room",
+		[LangTranslationKey.INCOMING]: "Received Cards",
+		[LangTranslationKey.OUTGOING]: "Given Cards",
+	}
+} as Lang

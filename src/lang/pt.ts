@@ -1,0 +1,42 @@
+import { LangTranslationKey } from "@/enums"
+
+export default {
+	name: "Portugal",
+	iconSrc: "/svg/langFlags/portugal-flag.svg",
+	translations: {
+		[LangTranslationKey.WEBSITE_NAME]: "Lobby das Cartas",
+		[LangTranslationKey.NEW_CHANNEL]: "Canal Novo",
+		[LangTranslationKey.LANGUAGE]: "Linguagem",
+		[LangTranslationKey.THEME]: "Tema",
+		[LangTranslationKey.PAGE_NOT_FOUND]: "Página não encontrada",
+		// JOGOS
+		[LangTranslationKey.OLHO]: "Olho",
+		[LangTranslationKey.LOGGED_IN]: "Logado como: ",
+		[LangTranslationKey.LOGGED_OUT]: "Desconectado",
+		[LangTranslationKey.ROOM_NAME]: "Nome da Sala",
+		[LangTranslationKey.GAME]: "Jogo",
+		[LangTranslationKey.PLAYER_COUNT]: "Jogadores",
+		[LangTranslationKey.LOBBY_TABLE_CAPTION]: "Cria, Apaga, ou entra numa sala de jogo!",
+		[LangTranslationKey.CREATE_GAME_ROOM]: "Criar Sala de Jogo",
+		[LangTranslationKey.CREATE_ROOM_DIALOG_DESCRIPTION]: "Escolhe um nome e o jogo para a nova sala de jogo",
+		[LangTranslationKey.CLOSE]: "Fechar",
+		[LangTranslationKey.CHOOSE_YOUR_USERNAME]: "Escolhe o teu Username",
+		[LangTranslationKey.USERNAME_DIALOG_DESCRIPTION]: "O username vai ser a tua forma de indentificação",
+		[LangTranslationKey.USER_NAME]: "Username",
+		[LangTranslationKey.CREATE_USER]: "Criar Username",
+		[LangTranslationKey.STATE]: "Estado",
+		[LangTranslationKey.IDLE]: "Espera",
+		[LangTranslationKey.ONGOING]: "A Decorrer",
+		[LangTranslationKey.PASSED]: "Passou",
+		[LangTranslationKey.WAITING]: "A Espera",
+		[LangTranslationKey.PLAYING]: "A jogar",
+		[LangTranslationKey.PRESIDENT]: "Presidente",
+		[LangTranslationKey.VICEPRESIDENT]: "Vice-Presidente",
+		[LangTranslationKey.NEUTRAL]: "Neutro",
+		[LangTranslationKey.VICEOLHO]: "Vice-Olho",
+		[LangTranslationKey.FINNISHED]: "Acabou",
+		[LangTranslationKey.LEFTROOM]: "Saiu da sala",
+		[LangTranslationKey.INCOMING]: "Cartas recebidas",
+		[LangTranslationKey.OUTGOING]: "Cartas dadas",
+	}
+} as Lang
