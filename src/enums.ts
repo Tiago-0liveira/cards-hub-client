@@ -87,3 +87,7 @@ export enum OlhoDonationType {
 	OUTGOING, INCOMING
 }
 
+export enum SoundName {
+	READY_TO_PLAY,
+	OLHO_ABAFADO
+}

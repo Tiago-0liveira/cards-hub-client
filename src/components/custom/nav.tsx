@@ -5,11 +5,25 @@ import LangSwitch from "./switchs/lang-switch"
 import ThemeSwitch from "./switchs/theme-switch"
 import { LangTranslationKey } from "@/enums"
 import { useSocketContext } from "../providers/socket-provider"
-
+import { Slider } from "../ui/slider"
+import { Volume1, Volume2, VolumeX } from "lucide-react"
 
 const Nav = () => {
-	const { lang } = useAppSettings()
+	const { lang, volume, setVolume } = useAppSettings()
 	const { user } = useSocketContext()
+
+	const handleVolumeSliderChange = (value: number[]) => {
+		setVolume(value[0])
+	}
+
+	const getVolumeIconBySound = (value: number) => {
+		if (value === 0)
+			return <VolumeX />
+		else if (value < 50)
+			return <Volume1 />
+		else
+			return <Volume2 />
+	}
 	
 	return (<nav className="nav-bar h-20 px-10 flex-grow min-w-[70%] max-w-[90%] flex items-center rounded-sm bg-card text-card-foreground shadow">
 		<div className="header">
@@ -18,9 +32,15 @@ const Nav = () => {
 				{user === null ? lang(LangTranslationKey.LOGGED_OUT) : lang(LangTranslationKey.LOGGED_IN) + user.username}
 			</div>
 		</div>
-		<div className="switches flex justify-between items-center w-[360px] ml-auto">
-			<LangSwitch className="lang-switch" />
-			<ThemeSwitch className="ml-1 theme-switch" />
+		<div className="settings flex flex-col justify-between items-center w-[400px] ml-auto">
+			<div className="switches flex w-full justify-evenly">
+				<LangSwitch className="lang-switch" />
+				<ThemeSwitch className="ml-1 theme-switch" />
+			</div>
+			<div className="volume flex justify-center w-full">
+				{getVolumeIconBySound(volume)}
+				<Slider className="w-[75%] ml-3" onValueChange={handleVolumeSliderChange} defaultValue={[volume]} max={100} min={0} step={10} />
+			</div>
 		</div>
 	</nav>)
 }

@@ -6,7 +6,7 @@ import { useAppSettings } from "@/components/providers/settings-provider"
 import { useSocketContext } from "@/components/providers/socket-provider"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { LangTranslationKey, OlhoDonationType, PresidentPlayerState, PresidentPosition, RoomStateBase, Suit } from "@/enums"
+import { OlhoDonationType, PresidentPlayerState, PresidentPosition, RoomStateBase, SoundName } from "@/enums"
 import { useCallback, useEffect, useState } from "react"
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
@@ -19,7 +19,7 @@ import {Hand as HandIcon} from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
-	const { lang } = useAppSettings()
+	const { lang, play_audio } = useAppSettings()
 	const { socket, user } = useSocketContext()
 	const [presidentRoom, setPresidentRoom] = useState<PresidentRoom>()
 	const [selectedCards, setSelectedCards] = useState<Card[]>([])
@@ -35,15 +35,21 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	}
 
 	useEffect(() => {
-		console.log("socket::", socket)
-		console.log("user::", user)
-		console.log("roomId::", roomId)
-
-
 		socket?.on("presidentRoomInfo", ({ room: roomArg }: { room: PresidentRoom }) => {
-			console.log("roomArg: ", roomArg);
 			const r = roomArg;
 			r.hands[user?.id ?? ""]?.hand.sort(cards_value_compare);
+			if (r.state === RoomStateBase.ONGOING) {
+				if (r.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING)
+				{
+					play_audio(SoundName.READY_TO_PLAY)
+				} else if (r.currentHand.length >= 2) {
+					const h1 = r.currentHand[r.currentHand.length - 1]
+					const h2 = r.currentHand[r.currentHand.length - 2]
+					if (h1.length === h2.length && h1.every((c, i) => c.value === h2[i].value)) {
+						play_audio(SoundName.OLHO_ABAFADO)
+					}
+				}
+			}
 			setPresidentRoom(roomArg);
 		})
 
@@ -55,11 +61,10 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				return d;
 			});
 		})
-		
 		apiPresidentRoomGetInfo(socket as Socket, roomId, user?.id ?? "")
-	}, [/*socket, roomId, user*/]);
+	}, [play_audio]);
 
-	const handleCardClick = (card: Card) => (e) => {
+	const handleCardClick = (card: Card) => () => {
 		setSelectedCards(prev => {
 			if (prev.find(c => c.suit === card.suit && c.value === card.value))
 				return prev.filter(c => c.suit !== card.suit || c.value !== card.value)
@@ -75,7 +80,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 		})
 	}
 
-	const handleReadyButtonClick = (ready: boolean) => (e) => {
+	const handleReadyButtonClick = (ready: boolean) => () => {
 		apiGameRoomSetUserReady(socket as Socket, roomId, user?.id ?? "", !ready);
 	}
 

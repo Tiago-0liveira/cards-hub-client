@@ -1,6 +1,7 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useState, useCallback } from "react";
-import { LangTranslationKey } from "@/enums"
+import { LangTranslationKey, SoundName } from "@/enums"
 import PT_LANG from "@/lang/pt";
+import { play_audio } from "@/audioManager";
 
 type Theme = "dark" | "light" | "system";
 
@@ -10,6 +11,7 @@ type AppSettingsProviderProps = {
   availableLanguages: Lang[];
   themeStorageKey?: string;
   languageStorageKey?: string;
+  volumeStorageKey?: string;
 };
 
 type AppSettingsProviderState = {
@@ -18,7 +20,10 @@ type AppSettingsProviderState = {
   language: Lang;
   setLanguage: (language: Lang) => void;
   availableLanguages: Lang[];
-  lang: (langTranslationKey: LangTranslationKey) => string
+  lang: (langTranslationKey: LangTranslationKey) => string;
+  volume: number;
+  setVolume: (volume: number) => void;
+  play_audio: (sound: SoundName) => void;
 };
 
 const initialLang: Lang = PT_LANG
@@ -29,7 +34,10 @@ const initialState: AppSettingsProviderState = {
   language: initialLang,
   setLanguage: () => null,
   availableLanguages: [initialLang], // set a default available language
-  lang: () => ""
+  lang: () => "",
+  volume: 0,
+  setVolume: () => null,
+  play_audio: () => null
 };
 
 const AppSettingsContext = createContext<AppSettingsProviderState>(initialState);
@@ -41,6 +49,7 @@ export function AppSettingsProvider({
   availableLanguages,
   themeStorageKey = "vite-ui-theme",
   languageStorageKey = "vite-ui-language",
+  volumeStorageKey = "vite-ui-volume",
   ...props
 }: PropsWithChildren<AppSettingsProviderProps>) {
   const [theme, setTheme] = useState<Theme>(
@@ -56,6 +65,32 @@ export function AppSettingsProvider({
       );
     }
   );
+
+  const [volume, setVolume] = useState<number>(
+	() => {
+		const savedVolume = localStorage.getItem(volumeStorageKey)
+		if (savedVolume !== null)
+		{
+			const v = parseFloat(savedVolume)
+			if (!isNaN(v)) return v
+		}
+		return 0.5
+	}
+  )
+
+  const handleSetVolume = (value: number) => {
+	localStorage.setItem(volumeStorageKey, value.toString())
+	console.log(value)
+	setVolume(value)
+  }
+
+  const handlePlayAudio = useCallback(
+	(sound: SoundName) => {
+	  play_audio(sound, volume)
+	},
+	[volume],
+  )
+  
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -92,12 +127,11 @@ export function AppSettingsProvider({
   
 
   const value: AppSettingsProviderState = {
-    theme,
-    setTheme: updateTheme,
-    language,
-    setLanguage: updateLanguage,
-    availableLanguages,
-	lang: translate()
+    theme, setTheme: updateTheme,
+    language, setLanguage: updateLanguage,
+    availableLanguages, lang: translate(),
+	volume, setVolume: handleSetVolume,
+	play_audio: handlePlayAudio
   };
 
   return (
