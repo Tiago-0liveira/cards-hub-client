@@ -70,6 +70,9 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 		socketInstance.on("goToLobby", () => {
 			navigate("/")
 		})
+		socketInstance.on("disconnect", () => {
+			navigate("/")
+		})
 		setSocket(socketInstance);
 
 		const localUser = localStorage.getItem("user")
