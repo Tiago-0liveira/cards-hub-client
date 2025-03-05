@@ -83,6 +83,10 @@ export enum PresidentPlayHandType {
 	SKIP, HAND
 }
 
+export enum PresidentLogType {
+	SKIP, HAND, BUFF
+}
+
 export enum OlhoDonationType {
 	OUTGOING, INCOMING
 }

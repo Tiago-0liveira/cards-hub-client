@@ -48,9 +48,25 @@ declare global {
 		hands: Record<string, PresidentPlayer>,
 		currentHand: Array<Array<Card>>,
 		lastPlayer: string,
+		lastPlayerAction: PresidentPlayHandType,
 		currentPlayer: string,
 		roundNumber: number,
 		playerOrder: string[]
+	}
+
+	export type Hand = {
+		type: PresidentLogType,
+		cards: Card[]
+	}
+
+	export type PresidentRoomLog = {
+		player_username: string,
+		hand: Hand,
+		handNumber: number
+	}
+
+	export type PresidentRoomWithLogs = PresidentRoom & {
+		logs: Record<number, PresidentRoomLog[]>
 	}
 }
 export {}

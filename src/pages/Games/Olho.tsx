@@ -1,12 +1,12 @@
 import { apiPresidentPlayHand, apiPresidentRoomGetInfo, apiPresidentRoomStartGame, apiPresidentSkipHand, cards_value_compare } from "@/api/games/olho"
 import { apiGameRoomSetUserReady, apiLeaveGameRoom } from "@/api/general"
 import { getCardSrc } from "@/assetsManager"
-import { Heading } from "@/components/custom/heading"
+import Heading from "@/components/custom/heading"
 import { useAppSettings } from "@/components/providers/settings-provider"
 import { useSocketContext } from "@/components/providers/socket-provider"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { OlhoDonationType, PresidentPlayerState, PresidentPosition, RoomStateBase, SoundName } from "@/enums"
+import { OlhoDonationType, PresidentLogType, PresidentPlayerState, PresidentPosition, RoomStateBase, SoundName } from "@/enums"
 import { useCallback, useEffect, useState } from "react"
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
@@ -21,7 +21,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	const { lang, play_audio } = useAppSettings()
 	const { socket, user } = useSocketContext()
-	const [presidentRoom, setPresidentRoom] = useState<PresidentRoom>()
+	const [presidentRoom, setPresidentRoom] = useState<PresidentRoomWithLogs>()
 	const [selectedCards, setSelectedCards] = useState<Card[]>([])
 	const navigate = useNavigate()
 	const userReady = useMemo(() => {
@@ -50,12 +50,56 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 					}
 				}
 			}
-			setPresidentRoom(roomArg);
+			setPresidentRoom(before => {
+				const updated: PresidentRoomWithLogs = { ...r, logs: before?.logs ?? {}};
+				updated.currentPlayer = Object.keys(updated.hands).find(k => updated.hands[k].state === PresidentPlayerState.PLAYING) ?? ""
+				if (r.state === RoomStateBase.ONGOING) {
+					if (!updated.logs[r.roundNumber]) {
+						updated.logs[r.roundNumber] = []
+					}
+					const handNumber = updated.logs[r.roundNumber].length
+					const last2Hands = r.currentHand.slice(-2)
+					if (r.roundNumber > 2 && updated.logs) {
+						Object.keys(updated.logs).map(parseInt).filter(k => k <= r.roundNumber - 2).forEach(k => {
+							delete updated.logs[k]
+						})
+					}
+					if (updated.logs[r.roundNumber].find(log => log.handNumber === handNumber) === undefined && r.lastPlayer)
+					{
+						const playerName = r.players.find(p => p.id === r.lastPlayer)?.username ?? "Player not found!"
+						if (last2Hands.length === 2 && last2Hands[0].length === last2Hands[1].length &&
+								last2Hands[0].every((c, i) => c.value === last2Hands[1][i].value)) {
+							updated.logs[r.roundNumber].push({
+								player_username: playerName,
+								hand: {
+									type: PresidentLogType.BUFF,
+									cards: r.currentHand.slice(-1)[0]
+								},
+								handNumber,
+							})
+						}
+						else {	
+							const newLog = {
+								player_username: playerName,
+								hand: {
+									type: PresidentLogType.HAND,
+									cards: r.currentHand.slice(-1)[0]
+								},
+								handNumber
+							}
+							if (updated.lastPlayerAction !== PresidentLogType.SKIP) {
+								updated.logs[r.roundNumber].push(newLog)
+							}
+						}
+					}
+				}
+				return updated
+			});
 		})
 
 		socket?.on("readyUpdate", (arg: { roomId: string; userId: string; ready: boolean }) => {
 			setPresidentRoom((prev) => {
-				const d: PresidentRoom | undefined = { ...prev };
+				const d: PresidentRoomWithLogs | undefined = { ...prev };
 				const p = d?.players?.find((u) => u.id === arg.userId);
 				if (p) p.ready = arg.ready;
 				return d;
@@ -149,46 +193,92 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 			<div className={`size-full max-w-screen-lg flex flex-col items-center pt-5 justify-between bg-center bg-no-repeat`}>
 				<div className="buttons flex justify-around w-64">
 					<Button variant="outline" onClick={handleGoBack}>Go back</Button>
-					{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral && 
+					{presidentRoom?.state === RoomStateBase.ONGOING &&
+					<>
+						{presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral && 
+							<Collapsible>
+								<CollapsibleTrigger asChild>
+									<Button variant="outline">Donations Drawer</Button>
+								</CollapsibleTrigger>
+								<CollapsibleContent>
+									<div className="donation-drawer-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
+										<div className="donation-incoming size-full">
+											<div className="h-10 py-2">
+												<span className="">
+													{lang(presidentDonationTypeToLangKey(OlhoDonationType.INCOMING))}
+												</span>
+											</div>
+											<Separator />
+											<div className="cards flex justify-evenly m-4">
+												{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.INCOMING)?.cards.map(card => {
+													const cardSrc = getCardSrc(card)
+													return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} />)
+												})}
+											</div>
+										</div>
+										<Separator />
+										<div className="donation-outgoing ">
+											<div className="h-10 py-2">
+												<span className="">
+													{lang(presidentDonationTypeToLangKey(OlhoDonationType.OUTGOING))}
+												</span>
+											</div>
+											
+											<Separator />
+											<div className="cards flex justify-evenly m-4">
+												{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.OUTGOING)?.cards.map(card => {
+													const cardSrc = getCardSrc(card)
+													return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />)
+												})}
+											</div>
+										</div>
+									</div>
+								</CollapsibleContent>
+							</Collapsible>
+						}
 						<Collapsible>
 							<CollapsibleTrigger asChild>
-								<Button variant="outline">Donations Drawer</Button>
+								<Button variant="outline">Game Logs</Button>
 							</CollapsibleTrigger>
 							<CollapsibleContent>
-								<div className="donation-drawer-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
-									<div className="donation-incoming size-full">
-										<div className="h-10 py-2">
-											<span className="">
-												{lang(presidentDonationTypeToLangKey(OlhoDonationType.INCOMING))}
-											</span>
+								<div className="game-logs-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
+									{Object.keys(presidentRoom?.logs ?? []).length === 0 
+										?
+										<div className="log">
+											No logs yet!
 										</div>
-										<Separator />
-										<div className="cards flex justify-evenly m-4">
-											{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.INCOMING)?.cards.map(card => {
-												const cardSrc = getCardSrc(card)
-												return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} />)
-											})}
-										</div>
-									</div>
-									<Separator />
-									<div className="donation-outgoing ">
-										<div className="h-10 py-2">
-											<span className="">
-												{lang(presidentDonationTypeToLangKey(OlhoDonationType.OUTGOING))}
-											</span>
-										</div>
-										
-										<Separator />
-										<div className="cards flex justify-evenly m-4">
-											{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.OUTGOING)?.cards.map(card => {
-												const cardSrc = getCardSrc(card)
-												return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />)
-											})}
-										</div>
-									</div>
+										: 
+										Object.keys(presidentRoom?.logs ?? []).map((logKey, index) =>
+											<div className="log-round" key={index}>
+												<span className="log-round-title">Round {parseInt(logKey)}</span>
+												<Separator />
+												{presidentRoom?.logs[parseInt(logKey)]?.length === 0
+												?
+													<span className="log-text">
+														No one has played yet!
+													</span>
+												:
+												presidentRoom?.logs[parseInt(logKey)]?.map((log, index) => 
+													{
+														return <div className="log flex items-center w-full" key={index}>
+															<div className="player w-20">{log.player_username}</div>
+															<div className="hand flex flex-1 justify-around">
+																{log.hand.cards.map(card => {
+																	const cardSrc = getCardSrc(card)
+																	return <img className="w-10 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />
+																})}
+															</div>
+														</div>
+													}
+												)}
+												<Separator />
+											</div>
+										)
+									}
 								</div>
 							</CollapsibleContent>
-						</Collapsible>}
+						</Collapsible>
+					</>}
 				</div>
 				{presidentRoom?.state === RoomStateBase.ONGOING && 
 					<div className="played-cards size-full flex flex-col items-center justify-center">
@@ -265,7 +355,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						</>
 					}
 				</div>
-				{presidentRoom?.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING && 
+				{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING && 
 					<div className="fixed bg-card top-30 w-24 h-28 flex justify-evenly flex-col p-2 play-div border rounded-md right-10">
 						<Button variant="outline" className="text-confirm" onClick={handlePlaySelectedCards}>Play Cards</Button>
 						<Button variant="outline" className="text-warning" onClick={handleSkipRound}>Skip</Button>
