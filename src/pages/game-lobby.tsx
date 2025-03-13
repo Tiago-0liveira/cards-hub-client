@@ -1,17 +1,11 @@
-import { Heading } from '@/components/custom/heading'
-import { Socket } from "socket.io-client"
 import { useEffect, useState } from 'react'
 import { useAppSettings } from '@/components/providers/settings-provider'
-import {LangTranslationKey, RoomStateBase} from "@/enums"
-import { Separator } from '@radix-ui/react-select'
-import { Button } from '@/components/ui/button'
-import NewChannelDialog, { NewChannelFormData } from '@/components/custom/dialogs/new-channel-dialog'
-import { apiCreateGameRoom, apiDeleteGameRoom, apiJoinGameRoom, channelTypeToString } from '@/api/general'
-import { Table, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { LucideTrash2, SendHorizontal } from "lucide-react";
 import { useSocketContext } from '@/components/providers/socket-provider'
-import { cx } from 'class-variance-authority'
+
 import Nav from '@/components/custom/nav'
+import OldGameRoomList from '@/components/Lobby/OldGameRoomList'
+import NewGameRoomList from '@/components/Lobby/NewGameRoomList'
+import Nav2 from '@/components/custom/nav2'
 
 function GameLobby() {
 	const { socket, rooms, user } = useSocketContext()
@@ -22,71 +16,13 @@ function GameLobby() {
 		socket?.emit("getRooms")
 	}, [socket]);
 
-	const handleNewChannelDialogSubmit = (formData: NewChannelFormData) => {
-		apiCreateGameRoom(socket as Socket, formData.roomName, formData.gameType, user?.id ?? "")
-	}
-	const handleRoomJoin = (roomId: string) => (_) => {
-		apiJoinGameRoom(socket as Socket, roomId, user?.id ?? "")
-	}
-	const handleRoomDelete = (roomId: string) => (_) => {
-		apiDeleteGameRoom(socket as Socket, roomId, user?.id ?? "")
-	}
 
 	return (
 		<div className="game-lobby size-full flex flex-col items-center p-8 bg-no-repeat bg-cover bg-[url(/lobby-wp2.png)]">
 			<Nav />
-			<div className="appWrapper size-full max-w-screen-lg flex items-center justify-center bg-no-repeat bg-center /*bg-[url(/lobby-wp2.png)]*/">
-				<div className="app size-full flex flex-col">
-					<div className="app-content mx-auto mt-10 flex flex-grow flex-col w-[550px] h-[700px] rounded-xl border bg-card text-card-foreground shadow">
-						<div className="content-header px-5 h-14 flex items-center">
-							<Heading level={3}>{lang(LangTranslationKey.NEW_CHANNEL)}</Heading>
-							<NewChannelDialog open={dialogOpen} setOpen={setDialogOpen} onSubmit={handleNewChannelDialogSubmit} />
-						</div>
-						<Separator className="border" />
-
-						<div className="table-wrapper w-full flex-grow overflow-y-auto">
-							
-							<Table className="w-full table-auto">
-								<TableHeader className="sticky">
-									<TableRow>
-										<TableHead className="text-left pl-4">{lang(LangTranslationKey.ROOM_NAME)}</TableHead>
-										<TableHead className="text-center">{lang(LangTranslationKey.GAME)}</TableHead>
-										<TableHead className="text-center">{lang(LangTranslationKey.STATE)}</TableHead>
-										<TableHead className="text-center">{lang(LangTranslationKey.PLAYER_COUNT)}</TableHead>
-										<TableHead className="w-4 text-right"></TableHead>
-									</TableRow>
-								</TableHeader>
-								<tbody className="table-body w-full">
-									{rooms.map((room) => (
-										<TableRow key={room.name}>
-											<TableCell className="text-left pl-4">{room.name}</TableCell>
-											<TableCell className="text-center">{lang(room.type)}</TableCell>
-											<TableCell className={cx("text-center text-warning", {"text-destructive": room.state === RoomStateBase.ONGOING})}>{lang(room.state)}</TableCell>
-											<TableCell className="text-center">{room.players.length}/8</TableCell>
-											<TableCell className="w-4 text-right">
-												<div className="flex">
-													<Button onClick={handleRoomJoin(room.id)} size="sm" variant={"outline"} className="border-transparent px-2 py-1 bg-transparent">
-														<SendHorizontal className="text-confirm" size="16px"/>
-													</Button>
-													{/* Only show if is room operator */}
-													{room.operator === user?.id ? <Button onClick={handleRoomDelete(room.id)} size="sm" variant={"outline"} className="border-transparent px-2 py-1 bg-transparent">
-														<LucideTrash2 className="text-destructive" size="16px"/>
-													</Button> : <></>}
-												</div>
-											</TableCell>
-										</TableRow>
-									))}
-								</tbody>
-							</Table>
-						</div>
-
-						<Separator className="border" />
-						<div className="mt-4 text-sm text-muted-foreground text-center w-full my-3">
-							{lang(LangTranslationKey.LOBBY_TABLE_CAPTION)}
-						</div>
-					</div>
-				</div>
-			</div>
+			{/*<Nav2 />*/}
+			<OldGameRoomList socket={socket} lang={lang} dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} rooms={rooms} user={user} />
+			{/*<NewGameRoomList socket={socket} lang={lang} dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} rooms={rooms} user={user} />*/}
 		</div>
   	)
 }

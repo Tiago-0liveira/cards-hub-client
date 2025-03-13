@@ -1,4 +1,4 @@
-import { Heading } from "@/components/custom/heading"
+import Heading from "@/components/custom/heading"
 import { useAppSettings } from "@/components/providers/settings-provider"
 import { LangTranslationKey } from "@/enums"
 

@@ -59,7 +59,13 @@ module.exports = {
     				'4': 'hsl(var(--chart-4))',
     				'5': 'hsl(var(--chart-5))'
     			}
-    		}
+    		},
+			gridTemplateColumns: {
+				autoFit: 'repeat(auto-fit, minmax(24rem, 1fr))',
+			},
+			gridTemplateRows: {
+				autoFit: 'repeat(auto-fit, minmax(3.5rem, 1fr))',
+			}
     	}
     },
 	plugins: [require("tailwindcss-animate")],

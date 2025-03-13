@@ -1,5 +1,5 @@
 import React from "react"
-import { Heading } from "./heading"
+import Heading from "./heading"
 import { useAppSettings } from "../providers/settings-provider"
 import LangSwitch from "./switchs/lang-switch"
 import ThemeSwitch from "./switchs/theme-switch"

@@ -6,7 +6,7 @@ type HeadingProps = {
 	className?: string;
 };
 
-export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({ level = 1, className, children }) => {
+const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({ level = 1, className, children }) => {
 	const headingStyles = {
 		1: "text-4xl font-bold tracking-tight",
 		2: "text-3xl font-bold",
@@ -22,3 +22,5 @@ export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({ level
 		</span>
 	);
 };
+
+export default Heading

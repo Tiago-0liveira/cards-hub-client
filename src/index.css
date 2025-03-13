@@ -104,10 +104,10 @@ button:focus-visible {
     --confirm: 127 55% 35%;
     --confirm-foreground: 0 30% 95%;
     --confirm-hover: 113 75% 42%;
-	--confirmDarker: 127 55% 35%;
+    --confirmDarker: 127 55% 35%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-	--destructiveDarker: 0 59% 51%;
+    --destructiveDarker: 0 59% 51%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
@@ -136,10 +136,10 @@ button:focus-visible {
     --confirm: 127 55% 35%;
     --confirm-foreground: 0 30% 95%;
     --confirm-hover: 113 75% 25%;
-	--confirmDarker: 127 55% 35%;
+    --confirmDarker: 127 55% 35%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-	--destructiveDarker: 0 84% 60%;
+    --destructiveDarker: 0 84% 60%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
@@ -175,9 +175,28 @@ button:focus-visible {
 }
 
 svg * {
-	user-select: none;
+  user-select: none;
 }
 
 svg g#Layer_x0020_1 {
-	stroke: none;
+  stroke: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 2px;
+  border: 2px solid #1e293b;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
