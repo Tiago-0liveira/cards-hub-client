@@ -51,6 +51,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				const updated: PresidentRoomDetailed = { ...r, logs: before?.logs ?? {} };
 				if (before?.state === RoomStateBase.IDLE && updated.state === RoomStateBase.ONGOING) {
 					updated.logs = {}
+					setSelectedCards([])
 				}
 				updated.currentPlayer = Object.keys(updated.hands).find(k => updated.hands[k].state === PresidentPlayerState.PLAYING) ?? ""
 				if (r.state === RoomStateBase.ONGOING) {
@@ -217,13 +218,13 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	}
 
 	return (
-		<div className="olho size-full flex flex-col items-center bg-[url(/table4.jpg)] bg-center bg-no-repeat bg-cover">
+		<div className="olho size-full flex flex-col items-center bg-[url(/table4.jpg)] bg-zoom bg-center bg-no-repeat bg-cover">
 			<Nav2 />
 			<div className={`size-full max-w-screen-lg flex flex-col items-center pt-5 justify-between bg-center bg-no-repeat`}>
 				<div className="buttons flex justify-around w-64">
 					<Button variant="outline" onClick={handleGoBack}>Go back</Button>
 					{presidentRoom?.state === RoomStateBase.ONGOING &&
-						<>
+						<>{/* Donations Drawer and Game Logs */}
 							{presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral &&
 								<Collapsible>
 									<CollapsibleTrigger asChild>
@@ -309,11 +310,21 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 							</Collapsible>
 						</>}
 				</div>
-				{presidentRoom?.state === RoomStateBase.ONGOING &&
-					<div className="played-cards size-full flex flex-col items-center justify-center">
-						<div className="hand flex mt-[10%]">
-							{presidentRoom?.currentHand.length !== 0 && presidentRoom?.currentHand[presidentRoom?.currentHand.length - 1].map((card, index) => {
-								const hand = presidentRoom?.currentHand[presidentRoom?.currentHand.length - 1] as Card[]
+				{presidentRoom && presidentRoom.state === RoomStateBase.ONGOING &&
+					<div className="relative played-cards select-none flex flex-col mt-40 w-full h-2/5 items-center justify-evenly">
+						
+						{/* LastPlayer hand by: */}
+						{presidentRoom.lastPlayer !== "" && 
+							<div className="absolute top-2 h-10 lastplay-by border rounded-md bg-card flex items-center">
+								<span className="p-4 lastplayer-name">{presidentRoom.players.find(u => u.id === presidentRoom.lastPlayer)?.username}</span>
+								<Separator className="" orientation="vertical"/>
+								<span className={cx("p-4 lastplayer-rank", PresidentPositionToTailwindClasses(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}>{lang(presidentPlayerPositionToLangKey(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}</span>								
+							</div>
+						}
+
+						<div className="hand flex">
+							{presidentRoom.currentHand.length !== 0 && presidentRoom.currentHand[presidentRoom.currentHand.length - 1].map((card, index) => {
+								const hand = presidentRoom.currentHand[presidentRoom.currentHand.length - 1] as Card[]
 								const csrc = getCardSrc(card)
 								return <img className="w-24 rounded-sm duration-300 animate-in animate-out"
 									style={{
@@ -324,6 +335,14 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 								/>
 							})}
 						</div>
+
+						{/* Play and Skip buttons */}
+						{presidentRoom.state === RoomStateBase.ONGOING && presidentRoom.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING &&
+							<div className="absolute bottom-0 flex justify-evenly p-2 play-div /*border rounded-md bg-card*/">
+								<Button variant="outline" className="text-confirm" onClick={handlePlaySelectedCards}>Play Cards</Button>
+								<Button variant="outline" className="text-warning ml-4" onClick={handleSkipRound}>Skip</Button>
+							</div>
+						}
 					</div>
 				}
 				<div className={cx("absolute players-list bg-card my-10 flex flex-col rounded-md border min-w-64 max-w-96 min-h-[50%] top-30 max-h-[80%] z-50", { "left-0": (presidentRoom?.state ?? RoomStateBase.IDLE) === RoomStateBase.ONGOING })}>
@@ -385,13 +404,6 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						</>
 					}
 				</div>
-				{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING &&
-					<div className="fixed right-[49%] top-[59%] w-24 h-28 flex justify-evenly p-2 play-div /*border rounded-md bg-card*/">
-						<Button variant="outline" className="text-confirm" onClick={handlePlaySelectedCards}>Play Cards</Button>
-						<Button variant="outline" className="text-warning ml-4" onClick={handleSkipRound}>Skip</Button>
-					</div>
-				}
-
 				<div className="relative cards w-full h-[22rem] mt-auto">
 					<div className="absolute size-full hover:translate-y-28 duration-150 translate-y-44">
 						{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.hand.map((card, index, arr) => {

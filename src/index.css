@@ -200,3 +200,7 @@ svg g#Layer_x0020_1 {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+.bg-zoom {
+	background-size: 2000px auto;
+}
