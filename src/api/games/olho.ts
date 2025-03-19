@@ -8,7 +8,6 @@ export const cards_value_compare = (a: Card, b: Card): number => (
 )
 
 export const apiPresidentRoomGetInfo = (socket: Socket, id: string, userId: string) => {
-	console.log("apiPresidentRoomGetInfo::id:", id, userId)
 	socket.emit(apiEventTypeToString(ApiEventType.PresidentRoomGetInfo), { id, userId })
 }
 

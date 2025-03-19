@@ -31,7 +31,7 @@ const OldGameRoomList: React.FC<React.PropsWithChildren<OldGameRoomListProps>> =
 	}
 
 	return (
-		<div className="appWrapper size-full max-w-screen-lg flex items-center justify-center bg-no-repeat bg-center /*bg-[url(/lobby-wp2.png)]*/">
+		<div className="appWrapper size-full max-w-screen-lg flex items-center justify-center bg-no-repeat bg-center mb-10 /*bg-[url(/lobby-wp2.png)]*/">
 			<div className="app size-full flex flex-col">
 				<div className="app-content mx-auto mt-10 flex flex-grow flex-col w-[550px] h-[700px] rounded-xl border bg-card text-card-foreground shadow">
 					<div className="content-header px-5 h-14 flex items-center">

@@ -4,7 +4,7 @@ declare global {
 	export type Lang = {
 		name: string,
 		iconSrc: string,
-		translations: {[key in LangTranslationKey]: string}
+		translations: { [key in LangTranslationKey]: string }
 	}
 	export type Room = {
 		id: string;
@@ -21,7 +21,7 @@ declare global {
 		socketId: string;
 		ready: boolean;
 	}
-	export type RoomCollection = { [K:string]: Room }
+	export type RoomCollection = { [K: string]: Room }
 
 	export type GameComponentProps = {
 		roomId: string
@@ -51,6 +51,7 @@ declare global {
 		lastPlayerAction: PresidentPlayHandType,
 		currentPlayer: string,
 		roundNumber: number,
+		handNumber: number,
 		playerOrder: string[]
 	}
 
@@ -65,8 +66,8 @@ declare global {
 		handNumber: number
 	}
 
-	export type PresidentRoomWithLogs = PresidentRoom & {
+	export type PresidentRoomDetailed = PresidentRoom & {
 		logs: Record<number, PresidentRoomLog[]>
 	}
 }
-export {}
+export { }

@@ -15,13 +15,15 @@ import { cx } from "class-variance-authority"
 import { toast } from "sonner"
 import { presidentDonationTypeToLangKey, presidentPlayerPositionToLangKey, presidentPlayerStateToLangKey } from "@/utils"
 import Nav from "@/components/custom/nav"
-import {Hand as HandIcon} from "lucide-react"
+import { Hand as HandIcon } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import Nav2 from "@/components/custom/nav2"
+import React from "react"
 
 const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	const { lang, play_audio } = useAppSettings()
 	const { socket, user } = useSocketContext()
-	const [presidentRoom, setPresidentRoom] = useState<PresidentRoomWithLogs>()
+	const [presidentRoom, setPresidentRoom] = useState<PresidentRoomDetailed>()
 	const [selectedCards, setSelectedCards] = useState<Card[]>([])
 	const navigate = useNavigate()
 	const userReady = useMemo(() => {
@@ -35,69 +37,66 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	}
 
 	useEffect(() => {
-		socket?.on("presidentRoomInfo", ({ room: roomArg }: { room: PresidentRoom }) => {
+		if (!socket) return
+		apiPresidentRoomGetInfo(socket, roomId, user?.id ?? "")
+	}, [socket, roomId, user?.id])
+
+	useEffect(() => {
+
+		const handlePresidentRoomInfo = ({ room: roomArg }: { room: PresidentRoom }) => {
+			console.log("roomArg: ", roomArg)
 			const r = roomArg;
 			r.hands[user?.id ?? ""]?.hand.sort(cards_value_compare);
-			if (r.state === RoomStateBase.ONGOING) {
-				if (r.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING)
-				{
-					play_audio(SoundName.READY_TO_PLAY)
-				} else if (r.currentHand.length >= 2) {
-					const h1 = r.currentHand[r.currentHand.length - 1]
-					const h2 = r.currentHand[r.currentHand.length - 2]
-					if (h1.length === h2.length && h1.every((c, i) => c.value === h2[i].value)) {
-						play_audio(SoundName.OLHO_ABAFADO)
-					}
-				}
-			}
 			setPresidentRoom(before => {
-				const updated: PresidentRoomWithLogs = { ...r, logs: before?.logs ?? {}};
+				const updated: PresidentRoomDetailed = { ...r, logs: before?.logs ?? {} };
+				if (before?.state === RoomStateBase.IDLE && updated.state === RoomStateBase.ONGOING) {
+					updated.logs = {}
+				}
 				updated.currentPlayer = Object.keys(updated.hands).find(k => updated.hands[k].state === PresidentPlayerState.PLAYING) ?? ""
 				if (r.state === RoomStateBase.ONGOING) {
 					if (!updated.logs[r.roundNumber]) {
 						updated.logs[r.roundNumber] = []
 					}
-					const handNumber = updated.logs[r.roundNumber].length
+
 					const last2Hands = r.currentHand.slice(-2)
-					
+
 					if (r.roundNumber > 2 && updated.logs) {
 						Object.keys(updated.logs).map(parseInt).filter(k => k <= r.roundNumber - 2).forEach(k => {
 							delete updated.logs[k]
 						})
 					}
-					if (updated.logs[r.roundNumber].find(log => log.handNumber === handNumber) === undefined && r.lastPlayer)
-					{
+					if (updated.logs[r.roundNumber].find(log => log.handNumber === updated.handNumber) === undefined && r.lastPlayer && r.lastPlayerAction !== PresidentPlayHandType.SKIP) {
 						const playerName = r.players.find(p => p.id === r.lastPlayer)?.username ?? "Player not found!"
 						if (updated.lastPlayerAction === PresidentPlayHandType.JOKER) {
 							const newLog = {
 								player_username: playerName,
 								hand: {
 									type: PresidentLogType.HAND,
-									cards: [{value: "JOKER", suit: Suit.CLUBS} as Card]
+									cards: [{ value: "JOKER", suit: Suit.CLUBS } as Card]
 								},
-								handNumber: updated.logs[r.roundNumber - 1].length
+								handNumber: updated.handNumber
 							}
 							updated.logs[r.roundNumber - 1].push(newLog)
 						}
 						else if (last2Hands.length === 2 && last2Hands[0].length === last2Hands[1].length &&
-								last2Hands[0].every((c, i) => c.value === last2Hands[1][i].value)) {
+							last2Hands[0].every((c, i) => c.value === last2Hands[1][i].value)) {
 							updated.logs[r.roundNumber].push({
 								player_username: playerName,
 								hand: {
 									type: PresidentLogType.BUFF,
 									cards: r.currentHand.slice(-1)[0]
 								},
-								handNumber,
+								handNumber: updated.handNumber,
 							})
 						}
-						else {	
+						else if (last2Hands.length !== 0) {
 							const newLog = {
 								player_username: playerName,
 								hand: {
 									type: PresidentLogType.HAND,
 									cards: r.currentHand.slice(-1)[0]
 								},
-								handNumber
+								handNumber: updated.handNumber
 							}
 							if (updated.lastPlayerAction !== PresidentPlayHandType.SKIP) {
 								updated.logs[r.roundNumber].push(newLog)
@@ -107,18 +106,36 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				}
 				return updated
 			});
-		})
 
-		socket?.on("readyUpdate", (arg: { roomId: string; userId: string; ready: boolean }) => {
+		}
+
+		const handleReadyUpdate = (arg: { roomId: string; userId: string; ready: boolean }) => {
 			setPresidentRoom((prev) => {
-				const d: PresidentRoomWithLogs | undefined = { ...prev };
+				const d: PresidentRoomDetailed | undefined = { ...prev };
 				const p = d?.players?.find((u) => u.id === arg.userId);
 				if (p) p.ready = arg.ready;
 				return d;
 			});
-		})
-		apiPresidentRoomGetInfo(socket as Socket, roomId, user?.id ?? "")
-	}, [play_audio]);
+		}
+
+		socket?.on("presidentRoomInfo", handlePresidentRoomInfo)
+		socket?.on("readyUpdate", handleReadyUpdate)
+		return () => {
+			socket?.off("presidentRoomInfo", handlePresidentRoomInfo);
+			socket?.off("readyUpdate", handleReadyUpdate);
+		};
+	}, [socket, roomId, user?.id]);
+
+	useEffect(() => {
+		const handlePlayAudio = (audioName: SoundName) => {
+			play_audio(audioName);
+		}
+		socket?.on("play_audio", handlePlayAudio)
+
+		return () => {
+			socket?.off("play_audio", handlePlayAudio);
+		};
+	}, [socket, play_audio]);
 
 	const handleCardClick = (card: Card) => () => {
 		setSelectedCards(prev => {
@@ -127,11 +144,12 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 			if (prev.every(c => c.value === card.value))
 				return [...prev, card]
 			toast("Error", {
-				description: "You can only select cards with the same value", 
+				description: "You can only select cards with the same value",
 				action: {
 					label: "Dismiss",
-					onClick: () => {},
-				},})
+					onClick: () => { },
+				},
+			})
 			return [...prev]
 		})
 	}
@@ -180,13 +198,12 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	}
 
 	const handlePlaySelectedCards = useCallback(() => {
-		if (selectedCards.length === 0)
-		{
+		if (selectedCards.length === 0) {
 			toast("Error", {
 				description: "Your hand is empty!",
 				action: {
 					label: "Dismiss",
-					onClick: () => {},
+					onClick: () => { },
 				}
 			})
 			return
@@ -200,99 +217,99 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	}
 
 	return (
-		<div className="olho size-full flex flex-col items-center bg-[url(/table4.jpg)] p-8 bg-no-repeat bg-cover">
-			<Nav />
+		<div className="olho size-full flex flex-col items-center bg-[url(/table4.jpg)] bg-center bg-no-repeat bg-cover">
+			<Nav2 />
 			<div className={`size-full max-w-screen-lg flex flex-col items-center pt-5 justify-between bg-center bg-no-repeat`}>
 				<div className="buttons flex justify-around w-64">
 					<Button variant="outline" onClick={handleGoBack}>Go back</Button>
 					{presidentRoom?.state === RoomStateBase.ONGOING &&
-					<>
-						{presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral && 
+						<>
+							{presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral &&
+								<Collapsible>
+									<CollapsibleTrigger asChild>
+										<Button variant="outline">Donations Drawer</Button>
+									</CollapsibleTrigger>
+									<CollapsibleContent>
+										<div className="donation-drawer-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
+											<div className="donation-incoming size-full">
+												<div className="h-10 py-2">
+													<span className="">
+														{lang(presidentDonationTypeToLangKey(OlhoDonationType.INCOMING))}
+													</span>
+												</div>
+												<Separator />
+												<div className="cards flex justify-evenly m-4">
+													{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.INCOMING)?.cards.map(card => {
+														const cardSrc = getCardSrc(card)
+														return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} />)
+													})}
+												</div>
+											</div>
+											<Separator />
+											<div className="donation-outgoing ">
+												<div className="h-10 py-2">
+													<span className="">
+														{lang(presidentDonationTypeToLangKey(OlhoDonationType.OUTGOING))}
+													</span>
+												</div>
+
+												<Separator />
+												<div className="cards flex justify-evenly m-4">
+													{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.OUTGOING)?.cards.map(card => {
+														const cardSrc = getCardSrc(card)
+														return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />)
+													})}
+												</div>
+											</div>
+										</div>
+									</CollapsibleContent>
+								</Collapsible>
+							}
 							<Collapsible>
 								<CollapsibleTrigger asChild>
-									<Button variant="outline">Donations Drawer</Button>
+									<Button variant="outline">Game Logs</Button>
 								</CollapsibleTrigger>
 								<CollapsibleContent>
-									<div className="donation-drawer-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
-										<div className="donation-incoming size-full">
-											<div className="h-10 py-2">
-												<span className="">
-													{lang(presidentDonationTypeToLangKey(OlhoDonationType.INCOMING))}
-												</span>
+									<div className="game-logs-content z-10 absolute right-0 w-80 bg-card border rounded-lg max-h-[500px] flex flex-col">
+										{Object.keys(presidentRoom?.logs ?? []).length === 0 ? (
+											<div className="log flex-1 flex items-center justify-center">
+												No logs yet!
 											</div>
-											<Separator />
-											<div className="cards flex justify-evenly m-4">
-												{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.INCOMING)?.cards.map(card => {
-													const cardSrc = getCardSrc(card)
-													return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} />)
-												})}
+										) : (
+											<div className="flex-1"> {/* Ensures the logs can scroll properly */}
+												{Object.keys(presidentRoom?.logs ?? []).map((logKey, index) => (
+													<div className="log-round flex flex-col" key={index}>
+														<span className="log-round-title">Round {parseInt(logKey)}</span>
+														<Separator />
+														<div className="overflow-y-auto custom-scrollbar max-h-[200px]"> {/* Set a reasonable height */}
+															{presidentRoom?.logs[parseInt(logKey)]?.length === 0 ? (
+																<span className="log-text">No one has played yet!</span>
+															) : (
+																presidentRoom?.logs[parseInt(logKey)]?.map((log, index) => (
+																	<div className="log flex items-center w-full" key={index}>
+																		<div className="player w-20">{log.player_username}</div>
+																		<div className="hand flex flex-1 justify-around">
+																			{log.hand.cards?.map((card) => {
+																				const cardSrc = getCardSrc(card);
+																				return <img className="w-10 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />;
+																			})}
+																		</div>
+																	</div>
+																))
+															)}
+														</div>
+														<Separator />
+													</div>
+												))}
 											</div>
-										</div>
-										<Separator />
-										<div className="donation-outgoing ">
-											<div className="h-10 py-2">
-												<span className="">
-													{lang(presidentDonationTypeToLangKey(OlhoDonationType.OUTGOING))}
-												</span>
-											</div>
-											
-											<Separator />
-											<div className="cards flex justify-evenly m-4">
-												{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.OUTGOING)?.cards.map(card => {
-													const cardSrc = getCardSrc(card)
-													return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />)
-												})}
-											</div>
-										</div>
+										)}
 									</div>
+
 								</CollapsibleContent>
 							</Collapsible>
-						}
-						<Collapsible>
-							<CollapsibleTrigger asChild>
-								<Button variant="outline">Game Logs</Button>
-							</CollapsibleTrigger>
-							<CollapsibleContent>
-							<div className="game-logs-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg max-h-[500px] flex flex-col">
-								{Object.keys(presidentRoom?.logs ?? []).length === 0 ? (
-									<div className="log flex-1 flex items-center justify-center">
-										No logs yet!
-									</div>
-								) : (
-									<div className="flex-1"> {/* Ensures the logs can scroll properly */}
-									{Object.keys(presidentRoom?.logs ?? []).map((logKey, index) => (
-										<div className="log-round flex flex-col" key={index}>
-											<span className="log-round-title">Round {parseInt(logKey)}</span>
-											<Separator />
-											<div className="overflow-y-auto custom-scrollbar max-h-[200px]"> {/* Set a reasonable height */}
-												{presidentRoom?.logs[parseInt(logKey)]?.length === 0 ? (
-													<span className="log-text">No one has played yet!</span>
-												) : (
-													presidentRoom?.logs[parseInt(logKey)]?.map((log, index) => (
-														<div className="log flex items-center w-full" key={index}>
-															<div className="player w-20">{log.player_username}</div>
-															<div className="hand flex flex-1 justify-around">
-																{log.hand.cards?.map((card) => {
-																	const cardSrc = getCardSrc(card);
-																	return <img className="w-10 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />;
-																})}
-															</div>
-														</div>
-													))
-												)}
-											</div>
-											<Separator />	
-										</div>
-									))}
-									</div>
-								)}
-							</div>
-
-							</CollapsibleContent>
-						</Collapsible>
-					</>}
+						</>}
 				</div>
-				{presidentRoom?.state === RoomStateBase.ONGOING && 
+				{presidentRoom?.state === RoomStateBase.ONGOING &&
 					<div className="played-cards size-full flex flex-col items-center justify-center">
 						<div className="hand flex mt-[10%]">
 							{presidentRoom?.currentHand.length !== 0 && presidentRoom?.currentHand[presidentRoom?.currentHand.length - 1].map((card, index) => {
@@ -309,21 +326,21 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						</div>
 					</div>
 				}
-				<div className={cx("absolute players-list bg-card my-10 flex flex-col rounded-md border min-w-64 max-w-96 min-h-[50%] top-30 max-h-[80%] z-50", {"left-7": (presidentRoom?.state ?? RoomStateBase.IDLE) === RoomStateBase.ONGOING})}>
+				<div className={cx("absolute players-list bg-card my-10 flex flex-col rounded-md border min-w-64 max-w-96 min-h-[50%] top-30 max-h-[80%] z-50", { "left-0": (presidentRoom?.state ?? RoomStateBase.IDLE) === RoomStateBase.ONGOING })}>
 					<div className="title py-2">
 						<Heading level={3}>Players List</Heading>
 					</div>
 					<Separator />
 
 					<div className={cx("players flex-grow ")}>
-						{presidentRoom?.state === RoomStateBase.IDLE && presidentRoom?.players.map((u) => 
+						{presidentRoom?.state === RoomStateBase.IDLE && presidentRoom?.players.map((u) =>
 							<div className="" key={u.id}>
 								<div className="player flex h-10 justify-around items-center text-left">
 									<span className="text-left flex-grow ml-3">{u.username}</span>
 									<Separator orientation="vertical" />
 									<span className={cx("text-center w-20", PresidentPositionToTailwindClasses(presidentRoom?.hands[u.id].position))}>{lang(presidentPlayerPositionToLangKey(presidentRoom?.hands[u.id]?.position))}</span>
 									<Separator orientation="vertical" />
-									<span className={cx("text-center w-24", {"text-confirm": u.ready, "text-warning": !u.ready})}>{u.ready ? "Ready" : "Not Ready"}</span>
+									<span className={cx("text-center w-24", { "text-confirm": u.ready, "text-warning": !u.ready })}>{u.ready ? "Ready" : "Not Ready"}</span>
 								</div>
 								<Separator />
 							</div>
@@ -332,7 +349,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 							const u = presidentRoom?.players.find(us => us.id === uId) as User
 							return (<div className="" key={u.id}>
 								<div className="player flex items-center justify-around h-10 text-left">
-									{presidentRoom?.hands[uId].handSize === 0 ? 
+									{presidentRoom?.hands[uId].handSize === 0 ?
 										<>
 											<span className="text-left flex-grow ml-6">{u.username}</span>
 											<Separator orientation="vertical" />
@@ -340,7 +357,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 										</>
 										:
 										<>
-											
+
 											<span className="w-4 text-center mr-2">{uId === presidentRoom?.lastPlayer && <HandIcon />}</span>
 											<span className="text-left flex-1">{u.username}</span>
 											<Separator orientation="vertical" />
@@ -353,7 +370,8 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 									}
 								</div>
 								<Separator />
-							</div>)}
+							</div>)
+						}
 						)}
 					</div>
 
@@ -367,10 +385,10 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						</>
 					}
 				</div>
-				{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING && 
-					<div className="fixed bg-card top-30 w-24 h-28 flex justify-evenly flex-col p-2 play-div border rounded-md right-10">
+				{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING &&
+					<div className="fixed right-[49%] top-[59%] w-24 h-28 flex justify-evenly p-2 play-div /*border rounded-md bg-card*/">
 						<Button variant="outline" className="text-confirm" onClick={handlePlaySelectedCards}>Play Cards</Button>
-						<Button variant="outline" className="text-warning" onClick={handleSkipRound}>Skip</Button>
+						<Button variant="outline" className="text-warning ml-4" onClick={handleSkipRound}>Skip</Button>
 					</div>
 				}
 
@@ -378,21 +396,21 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 					<div className="absolute size-full hover:translate-y-28 duration-150 translate-y-44">
 						{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.hand.map((card, index, arr) => {
 							const cardImgPath = getCardSrc(card)
-							return ( <div 
-								className={"card absolute w-26 hover:!translate-y-[-10rem]  rounded-xl  duration-300 animate-in animate-out delay-50"} 
+							return (<div
+								className={"card absolute w-26 hover:!translate-y-[-10rem]  rounded-xl  duration-300 animate-in animate-out delay-50"}
 								style={{
 									left: `${index * 81 / arr.length - 4}%`,
 									transform: `translateX(${index * 13}px) translateY(${arr.length / 2 - index}px) rotate(${(index - arr.length / 2) * 3}deg)`
 								}}
-									key={`${card.value}-${card.suit}-${index}`}
-									onClick={handleCardClick(card)}
-								>
-									<img src={cardImgPath} alt={cardImgPath} 
-										className={`
+								key={`${card.value}-${card.suit}-${index}`}
+								onClick={handleCardClick(card)}
+							>
+								<img src={cardImgPath} alt={cardImgPath}
+									className={`
 											rounded-xl
 											${selectedCards.some(c => c.value === card.value && c.suit === card.suit) && "glowing-border"}
 										`}
-									/>
+								/>
 							</div>)
 						})}
 					</div>
@@ -402,4 +420,4 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	)
 }
 
-export default Olho
+export default React.memo(Olho)
