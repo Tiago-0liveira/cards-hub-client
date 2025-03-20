@@ -136,7 +136,7 @@ button:focus-visible {
     --confirm: 127 55% 35%;
     --confirm-foreground: 0 30% 95%;
     --confirm-hover: 113 75% 25%;
-    --confirmDarker: 127 55% 35%;
+    --confirmDarker: 126, 56%, 23%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --destructiveDarker: 0 84% 60%;

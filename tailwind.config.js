@@ -41,6 +41,9 @@ module.exports = {
     				foreground: 'hsl(var(--confirm-foreground))',
 					hover: 'hsl(var(--confirm-hover))'
 				},
+				confirmDarker: {
+					DEFAULT: 'hsl(var(--confirmDarker))',
+				},
 				warning: {
 					DEFAULT: 'hsl(var(--warning))',
 					foreground: 'hsl(var(--warning-foreground))'

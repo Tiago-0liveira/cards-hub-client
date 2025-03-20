@@ -15,7 +15,7 @@ import { cx } from "class-variance-authority"
 import { toast } from "sonner"
 import { presidentDonationTypeToLangKey, presidentPlayerPositionToLangKey, presidentPlayerStateToLangKey } from "@/utils"
 import Nav from "@/components/custom/nav"
-import { Hand as HandIcon } from "lucide-react"
+import { Crown, Hand as HandIcon } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import Nav2 from "@/components/custom/nav2"
 import React from "react"
@@ -36,13 +36,10 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 		navigate("/")
 	}
 
-	useEffect(() => {
-		if (!socket) return
-		apiPresidentRoomGetInfo(socket, roomId, user?.id ?? "")
-	}, [socket, roomId, user?.id])
 
 	useEffect(() => {
-
+		if (!socket) return;
+		
 		const handlePresidentRoomInfo = ({ room: roomArg }: { room: PresidentRoom }) => {
 			console.log("roomArg: ", roomArg)
 			const r = roomArg;
@@ -121,6 +118,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 
 		socket?.on("presidentRoomInfo", handlePresidentRoomInfo)
 		socket?.on("readyUpdate", handleReadyUpdate)
+		apiPresidentRoomGetInfo(socket, roomId, user?.id ?? "")
 		return () => {
 			socket?.off("presidentRoomInfo", handlePresidentRoomInfo);
 			socket?.off("readyUpdate", handleReadyUpdate);
@@ -354,10 +352,12 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 					<div className={cx("players flex-grow ")}>
 						{presidentRoom?.state === RoomStateBase.IDLE && presidentRoom?.players.map((u) =>
 							<div className="" key={u.id}>
-								<div className="player flex h-10 justify-around items-center text-left">
-									<span className="text-left flex-grow ml-3">{u.username}</span>
+								<div className={cx("player flex h-10 justify-around items-center text-left", {"bg-slate-900": user?.id === u.id})}>
+									<span className={cx("text-left flex flex-grow items-center ml-3", {"text-yellow-500": presidentRoom?.operator === u.id})}>{u.username}{presidentRoom?.operator === u.id && <Crown className="ml-1 text-yellow-500" size={"16px"} />}</span>
 									<Separator orientation="vertical" />
-									<span className={cx("text-center w-20", PresidentPositionToTailwindClasses(presidentRoom?.hands[u.id].position))}>{lang(presidentPlayerPositionToLangKey(presidentRoom?.hands[u.id]?.position))}</span>
+									<span className={cx("text-center w-20", PresidentPositionToTailwindClasses(presidentRoom?.hands[u.id].position))}>
+										{lang(presidentPlayerPositionToLangKey(presidentRoom?.hands[u.id]?.position))}
+									</span>
 									<Separator orientation="vertical" />
 									<span className={cx("text-center w-24", { "text-confirm": u.ready, "text-warning": !u.ready })}>{u.ready ? "Ready" : "Not Ready"}</span>
 								</div>
@@ -370,7 +370,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 								<div className="player flex items-center justify-around h-10 text-left">
 									{presidentRoom?.hands[uId].handSize === 0 ?
 										<>
-											<span className="text-left flex-grow ml-6">{u.username}</span>
+											<span className={cx("text-left flex-grow ml-6")}>{u.username}</span>
 											<Separator orientation="vertical" />
 											<span className="game-position text-center w-28">{lang(presidentPlayerPositionToLangKey(presidentRoom?.hands[uId].position))}</span>
 										</>
@@ -378,7 +378,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 										<>
 
 											<span className="w-4 text-center mr-2">{uId === presidentRoom?.lastPlayer && <HandIcon />}</span>
-											<span className="text-left flex-1">{u.username}</span>
+											<span className={cx("text-left flex-1")}>{u.username}</span>
 											<Separator orientation="vertical" />
 											<span className={cx("w-20 text-center", PresidentPlayerStateToTailwindClasses(presidentRoom?.hands[u.id]?.state))}>
 												{lang(presidentPlayerStateToLangKey(presidentRoom?.hands[u.id]?.state))}
