@@ -64,15 +64,7 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 			console.log("playerLeftRoom", arg.rooms)
 			setRooms(Object.values(arg.rooms))
 		})
-		socketInstance.on("enterRoom", (arg: { room: Room }) => {
-			navigate(`/room/${arg.room.type}/${arg.room.id}`)
-		})
-		socketInstance.on("goToLobby", () => {
-			navigate("/")
-		})
-		socketInstance.on("disconnect", () => {
-			navigate("/")
-		})
+		
 		setSocket(socketInstance);
 
 		const localUser = localStorage.getItem("user")
@@ -84,9 +76,37 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 		}
 
 		return () => {
+			socketInstance.off("userUpdate")
+			socketInstance.off("error")
+			socketInstance.off("rooms")
+			socketInstance.off("roomCreated")
+			socketInstance.off("roomDeleted")
+			socketInstance.off("playerJoinedRoom")
+			socketInstance.off("playerLeftRoom")
+			socketInstance.off("enterRoom")
+			socketInstance.off("goToLobby")
+			socketInstance.off("disconnect")
 			socketInstance.disconnect();
 		};
 	}, []);
+
+	useEffect(() => {
+		if (!socket) return;
+		socket.on("enterRoom", (arg: { room: Room }) => {
+			navigate(`/room/${arg.room.type}/${arg.room.id}`)
+		})
+		socket.on("goToLobby", () => {
+			navigate("/")
+		})
+		socket.on("disconnect", () => {
+			navigate("/")
+		})
+		return () => {
+			socket.off("enterRoom");
+			socket.off("goToLobby");
+			socket.off("disconnect");
+		}
+	}, [socket, navigate])
 
 	return (
 		<SocketContext.Provider value={{ socket, rooms, setRooms, user }}>
