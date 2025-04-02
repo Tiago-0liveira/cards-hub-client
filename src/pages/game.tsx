@@ -2,8 +2,10 @@ import { useParams } from "react-router-dom";
 import NotFound from "./not-found";
 import { GameChannelType } from "@/enums";
 
-import Olho from "@/pages/Games/Olho"
+import Olho from "@/pages/Games/olho/Olho"
+import NewOlho from "@/pages/Games/olho/newOlho"
 import { useSocketContext } from "@/components/providers/socket-provider";
+import { BannerProvider } from "@/components/custom/banner-system/context";
 
 const Game = () => {
 	const { roomType, roomId } = useParams();
@@ -16,7 +18,9 @@ const Game = () => {
 
 	switch (gameEnum) {
 		case GameChannelType.OLHO:
-			return <Olho roomId={roomId as string} />
+			return <BannerProvider>
+				<NewOlho roomId={roomId as string} />
+			</BannerProvider>
 		default:
 			return <NotFound />;
 	}

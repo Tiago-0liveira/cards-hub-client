@@ -40,6 +40,7 @@ declare global {
 		hand: Card[],
 		position: PresidentPosition,
 		state: PresidentPlayerState,
+		lastState: PresidentPlayerState,
 		handSize: number,
 		donations: OlhoDonation[]
 	}
@@ -47,11 +48,13 @@ declare global {
 	export type PresidentRoom = Room & {
 		hands: Record<string, PresidentPlayer>,
 		currentHand: Array<Array<Card>>,
+		winningPlayer: string,
 		lastPlayer: string,
 		lastPlayerAction: PresidentPlayHandType,
 		currentPlayer: string,
 		roundNumber: number,
 		handNumber: number,
+		rankedGame: boolean,
 		playerOrder: string[]
 	}
 

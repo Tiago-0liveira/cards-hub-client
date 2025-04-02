@@ -58,7 +58,7 @@ const OldGameRoomList: React.FC<React.PropsWithChildren<OldGameRoomListProps>> =
 										<TableCell className="text-left pl-4">{room.name}</TableCell>
 										<TableCell className="text-center">{lang(room.type)}</TableCell>
 										<TableCell className={cx("text-center text-warning", {"text-destructive": room.state === RoomStateBase.ONGOING})}>{lang(room.state)}</TableCell>
-										<TableCell className="text-center">{room.players.length}/8</TableCell>
+										<TableCell className="text-center">{room.players.length}/7</TableCell>
 										<TableCell className="w-4 text-right">
 											<div className="flex">
 												<Button onClick={handleRoomJoin(room.id)} size="sm" variant={"outline"} className="border-transparent px-2 py-1 bg-transparent">

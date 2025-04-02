@@ -13,12 +13,13 @@ import { useNavigate } from "react-router-dom"
 import { Socket } from "socket.io-client"
 import { cx } from "class-variance-authority"
 import { toast } from "sonner"
-import { presidentDonationTypeToLangKey, presidentPlayerPositionToLangKey, presidentPlayerStateToLangKey } from "@/utils"
+import { presidentDonationTypeToLangKey, presidentPlayerPositionToLangKey, presidentPlayerStateToLangKey, PresidentPlayerStateToTailwindClasses, PresidentPositionToTailwindClasses } from "@/utils/olho"
 import Nav from "@/components/custom/nav"
 import { Crown, Hand as HandIcon } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import Nav2 from "@/components/custom/nav2"
 import React from "react"
+import OlhoPlayerCard from "@/components/custom/olho/playerCard"
 
 const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	const { lang, play_audio } = useAppSettings()
@@ -39,7 +40,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 
 	useEffect(() => {
 		if (!socket) return;
-		
+
 		const handlePresidentRoomInfo = ({ room: roomArg }: { room: PresidentRoom }) => {
 			console.log("roomArg: ", roomArg)
 			const r = roomArg;
@@ -63,8 +64,9 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 							delete updated.logs[k]
 						})
 					}
-					if (updated.logs[r.roundNumber].find(log => log.handNumber === updated.handNumber) === undefined && r.lastPlayer && r.lastPlayerAction !== PresidentPlayHandType.SKIP) {
-						const playerName = r.players.find(p => p.id === r.lastPlayer)?.username ?? "Player not found!"
+					if (updated.logs[r.roundNumber].find(log => log.handNumber === updated.handNumber) === undefined && (r.lastPlayer || (!r.lastPlayer && r.winningPlayer)) && r.lastPlayerAction !== PresidentPlayHandType.SKIP) {
+						const toFindPlayerId = r.lastPlayer !== "" ? r.lastPlayer : r.winningPlayer
+						const playerName = r.players.find(p => p.id === toFindPlayerId)?.username ?? "Player not found!"
 						if (updated.lastPlayerAction === PresidentPlayHandType.JOKER) {
 							const newLog = {
 								player_username: playerName,
@@ -74,7 +76,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 								},
 								handNumber: updated.handNumber
 							}
-							updated.logs[r.roundNumber - 1].push(newLog)
+							updated.logs[r.roundNumber - 1]?.push(newLog)
 						}
 						else if (last2Hands.length === 2 && last2Hands[0].length === last2Hands[1].length &&
 							last2Hands[0].every((c, i) => c.value === last2Hands[1][i].value)) {
@@ -161,41 +163,6 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 		apiPresidentRoomStartGame(socket as Socket, roomId)
 	}
 
-	const PresidentPlayerStateToTailwindClasses = (state: PresidentPlayerState): string => {
-		switch (state) {
-			case PresidentPlayerState.PASSED:
-				return "text-muted-foreground"
-			case PresidentPlayerState.WAITING:
-				return "text-warning"
-			case PresidentPlayerState.PLAYING:
-				return "text-confirm"
-			case PresidentPlayerState.FINNISHED:
-				return "text-confirm"
-			case PresidentPlayerState.LEFTROOM:
-				return "text-warning"
-			default:
-				throw Error("Invalid presidentPlayerState")
-				break;
-		}
-	}
-
-	const PresidentPositionToTailwindClasses = (position: PresidentPosition): string => {
-		switch (position) {
-			case PresidentPosition.PRESIDENT:
-				return "text-confirm"
-			case PresidentPosition.VICE_PRESIDENT:
-				return "text-confirmDarker"
-			case PresidentPosition.Neutral:
-				return "text-mutex-foreground"
-			case PresidentPosition.VICE_OLHO:
-				return "text-destructiveDarker"
-			case PresidentPosition.OLHO:
-				return "text-destructive"
-			default:
-				throw Error("Invalid presidentPosition")
-		}
-	}
-
 	const handlePlaySelectedCards = useCallback(() => {
 		if (selectedCards.length === 0) {
 			toast("Error", {
@@ -216,9 +183,9 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	}
 
 	return (
-		<div className="olho size-full flex flex-col items-center bg-[url(/table4.jpg)] bg-zoom bg-center bg-no-repeat bg-cover">
+		<div className="olho size-full flex flex-col items-center bg-[url(/olho-background2.png)] bg-center bg-no-repeat bg-cover">
 			<Nav2 />
-			<div className={`size-full max-w-screen-lg flex flex-col items-center pt-5 justify-between bg-center bg-no-repeat`}>
+			<div className={`size-full max-w-screen-lg flex flex-col items-center pt-5 justify-between bg-center bg-no-repeat bg-cover`}>
 				<div className="buttons flex justify-around w-64">
 					<Button variant="outline" onClick={handleGoBack}>Go back</Button>
 					{presidentRoom?.state === RoomStateBase.ONGOING &&
@@ -310,16 +277,17 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				</div>
 				{presidentRoom && presidentRoom.state === RoomStateBase.ONGOING &&
 					<div className="relative played-cards select-none flex flex-col mt-40 w-full h-2/5 items-center justify-evenly">
-						
+
 						{/* LastPlayer hand by: */}
-						{presidentRoom.lastPlayer !== "" && 
+						{presidentRoom.lastPlayer !== "" &&
 							<div className="absolute top-2 h-10 lastplay-by border rounded-md bg-card flex items-center">
 								<span className="p-4 lastplayer-name">{presidentRoom.players.find(u => u.id === presidentRoom.lastPlayer)?.username}</span>
-								<Separator className="" orientation="vertical"/>
-								<span className={cx("p-4 lastplayer-rank", PresidentPositionToTailwindClasses(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}>{lang(presidentPlayerPositionToLangKey(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}</span>								
+								<Separator className="" orientation="vertical" />
+								<span className={cx("p-4 lastplayer-rank", PresidentPositionToTailwindClasses(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}>{lang(presidentPlayerPositionToLangKey(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}</span>
 							</div>
 						}
 
+						{/* LastPlayer hand */}
 						<div className="hand flex">
 							{presidentRoom.currentHand.length !== 0 && presidentRoom.currentHand[presidentRoom.currentHand.length - 1].map((card, index) => {
 								const hand = presidentRoom.currentHand[presidentRoom.currentHand.length - 1] as Card[]
@@ -343,17 +311,20 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						}
 					</div>
 				}
+				{/* Players List */}
+				 
 				<div className={cx("absolute players-list bg-card my-10 flex flex-col rounded-md border min-w-64 max-w-96 min-h-[50%] top-30 max-h-[80%] z-50", { "left-0": (presidentRoom?.state ?? RoomStateBase.IDLE) === RoomStateBase.ONGOING })}>
 					<div className="title py-2">
 						<Heading level={3}>Players List</Heading>
 					</div>
 					<Separator />
-
-					<div className={cx("players flex-grow ")}>
+					
+					<div className={cx("relative players flex-grow")}>
+						{/* Game lobby */}
 						{presidentRoom?.state === RoomStateBase.IDLE && presidentRoom?.players.map((u) =>
-							<div className="" key={u.id}>
-								<div className={cx("player flex h-10 justify-around items-center text-left", {"bg-slate-900": user?.id === u.id})}>
-									<span className={cx("text-left flex flex-grow items-center ml-3", {"text-yellow-500": presidentRoom?.operator === u.id})}>{u.username}{presidentRoom?.operator === u.id && <Crown className="ml-1 text-yellow-500" size={"16px"} />}</span>
+							<div className="relative" key={u.id}>
+								<div className={cx("player flex h-10 justify-around items-center text-left", { "bg-slate-900": user?.id === u.id })}>
+									<span className={cx("text-left flex flex-grow items-center ml-3", { "text-yellow-500": presidentRoom?.operator === u.id })}>{u.username}{presidentRoom?.operator === u.id && <Crown className="ml-1 text-yellow-500" size={"16px"} />}</span>
 									<Separator orientation="vertical" />
 									<span className={cx("text-center w-20", PresidentPositionToTailwindClasses(presidentRoom?.hands[u.id].position))}>
 										{lang(presidentPlayerPositionToLangKey(presidentRoom?.hands[u.id]?.position))}
@@ -364,9 +335,11 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 								<Separator />
 							</div>
 						)}
+						{/* ongoing Game */}
 						{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.playerOrder.map((uId) => {
 							const u = presidentRoom?.players.find(us => us.id === uId) as User
 							return (<div className="" key={u.id}>
+								{/*<OlhoPlayerCard player={presidentRoom.hands[uId]} user={u} />*/}
 								<div className="player flex items-center justify-around h-10 text-left">
 									{presidentRoom?.hands[uId].handSize === 0 ?
 										<>
@@ -377,7 +350,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 										:
 										<>
 
-											<span className="w-4 text-center mr-2">{uId === presidentRoom?.lastPlayer && <HandIcon />}</span>
+											<span className="w-4 text-center mr-2">{uId === presidentRoom?.winningPlayer && <HandIcon />}</span>
 											<span className={cx("text-left flex-1")}>{u.username}</span>
 											<Separator orientation="vertical" />
 											<span className={cx("w-20 text-center", PresidentPlayerStateToTailwindClasses(presidentRoom?.hands[u.id]?.state))}>

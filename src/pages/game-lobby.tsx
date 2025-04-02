@@ -18,7 +18,7 @@ function GameLobby() {
 
 
 	return (
-		<div className="game-lobby size-full flex flex-col items-center /*p-8*/ bg-no-repeat bg-cover bg-[url(/lobby-wp2.png)]">
+		<div className="game-lobby size-full flex flex-col items-center /*p-8*/ bg-no-repeat bg-center bg-cover bg-[url(/olho-background-no-table.png)]">
 			{/*<Nav />*/}
 			<Nav2 />
 			<OldGameRoomList socket={socket} lang={lang} dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} rooms={rooms} user={user} />

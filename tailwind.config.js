@@ -4,6 +4,9 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
 	theme: {
     	extend: {
+			fontFamily: {
+				ubuntu: ['Ubuntu', 'sans-serif'],
+			},
     		borderRadius: {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
@@ -50,8 +53,13 @@ module.exports = {
 				},
     			destructive: {
     				DEFAULT: 'hsl(var(--destructive))',
-    				foreground: 'hsl(var(--destructive-foreground))'
+    				foreground: 'hsl(var(--destructive-foreground))',
+					Darker: 'hsl(var(--destructiveDarker))'
     			},
+				olhoPlayer: {
+					DEFAULT: 'hsl(var(--olho-player-card-bg))',
+					"position-box": 'hsl(var(--olho-player-card-position-box))'
+				},
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',
     			ring: 'hsl(var(--ring))',
