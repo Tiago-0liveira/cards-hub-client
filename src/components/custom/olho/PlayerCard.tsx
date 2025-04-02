@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cx } from 'class-variance-authority'
 import React, { useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { CrownIcon } from 'lucide-react';
 
 export type OlhoPlayerCardProps = {
@@ -87,7 +87,7 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 				<AvatarImage src={`https://api.dicebear.com/7.x/adventurer/png?seed=${user.socketId}`} alt="api.dicebear.com fetched avatar" />
 				<AvatarFallback>CN</AvatarFallback>
 			</Avatar>
-			<motion.div 
+			<motion.div
 				className={cx("absolute z-0 flex w-36 h-12")}
 				initial={{ x: 10, y: -17 }}
 				whileHover={{ y: -40 }}
@@ -97,17 +97,23 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 						<span>{player.handSize}</span>
 					</div>
 				}
-				{Array(cardCount).fill(5).map((_, index) => (
-					<motion.img
-						key={index}
-						src={"/svg/cards/back.svg"}
-						className="absolute aspect-auto h-14"
-						style={{
-							left: `${index * 21 / cardCount}%`,
-							transform: `translateX(${index * 11}px) translateY(${cardCount / 2}px) rotate(${(index - cardCount / 2) * 6}deg)`
-						}}
-					/>
-				))}
+				<AnimatePresence>
+					{Array(cardCount).fill(5).map((_, index) => (
+						<motion.img
+							key={index}
+							src={"/svg/cards/back.svg"}
+							className="absolute aspect-auto h-14"
+							style={{
+								left: `${index * 21 / cardCount}%`,
+								transform: `translateX(${index * 11}px) translateY(${cardCount / 2}px) rotate(${(index - cardCount / 2) * 6}deg)`
+							}}
+							exit={{
+								x: 50,
+								opacity: 0
+							}}
+						/>
+					))}
+				</AnimatePresence>
 			</motion.div>
 			<div className={cx("black-box relative z-10 rounded-full bg-olhoPlayer p-2 flex items-center justify-normal w-56 h-12 shadow-2xl")}>
 				<TooltipProvider delayDuration={100}>
