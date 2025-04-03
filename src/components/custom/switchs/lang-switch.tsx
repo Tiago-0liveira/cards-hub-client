@@ -7,7 +7,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useAppSettings } from '@/components/providers/settings-provider'
-import { LangTranslationKey } from '@/enums'
+import { LangKey } from '@/enums'
 
 type LangSwitchProps = HTMLAttributes<HTMLDivElement>
 
@@ -26,7 +26,7 @@ const LangSwitch: React.FC<LangSwitchProps> = () => {
 	return (
 		<Select value={language.name} onValueChange={handleLanguageChange}>
 			<SelectTrigger className="w-[160px]">
-				<SelectValue placeholder={lang(LangTranslationKey.LANGUAGE)} />
+				<SelectValue placeholder={lang(LangKey.LANGUAGE)} />
 			</SelectTrigger>
 			<SelectContent>
 				{availableLanguages.map(lang => (

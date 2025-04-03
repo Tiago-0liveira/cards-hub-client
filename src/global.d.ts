@@ -1,10 +1,10 @@
-import { LangTranslationKey, RoomStateBase, Suit } from "./enums"
+import { LangKey, RoomStateBase, Suit } from "./enums"
 
 declare global {
 	export type Lang = {
 		name: string,
 		iconSrc: string,
-		translations: { [key in LangTranslationKey]: string }
+		translations: { [key in LangKey]: string }
 	}
 	export type Room = {
 		id: string;

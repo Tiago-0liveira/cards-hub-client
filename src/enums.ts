@@ -11,7 +11,7 @@ export enum ApiEventType {
 	PresidentRoomPlayHand
 }
 
-export enum LangTranslationKey {
+export enum LangKey {
 	IDLE,
 	ONGOING,
 	//JOGOS have to be first
@@ -46,18 +46,29 @@ export enum LangTranslationKey {
 	VICEPRESIDENT,
 	NEUTRAL,
 	VICEOLHO,
+	DONATIONS_DRAWER,
 	INCOMING,
-	OUTGOING
+	OUTGOING,
+	LOGS,
+	EMPTY,
+	ROUND,
+	NO_ONE_PLAYED,
+	PLAY_CARDS,
+	SKIP,
+	START,
+	GO_BACK,
+	READY,
+	NOT_READY
 }
 
 export enum GameChannelType {
-	OLHO = LangTranslationKey.OLHO,
+	OLHO = LangKey.OLHO,
 	NUM
 }
 
 export enum RoomStateBase {
-	IDLE = LangTranslationKey.IDLE,
-	ONGOING = LangTranslationKey.ONGOING
+	IDLE = LangKey.IDLE,
+	ONGOING = LangKey.ONGOING
 }
 
 export enum Suit {

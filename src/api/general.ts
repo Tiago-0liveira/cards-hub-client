@@ -1,5 +1,5 @@
-import { ApiEventType, GameChannelType, LangTranslationKey } from "@/enums";
-import {Socket} from "socket.io-client"
+import { ApiEventType, GameChannelType, LangKey } from "@/enums";
+import { Socket } from "socket.io-client"
 
 export const channelTypeToString = (channelType: GameChannelType): string => {
 	switch (channelType) {
@@ -46,7 +46,7 @@ export const apiGameEventFunc = (channelType: GameChannelType) => (socket: Socke
 	socket.emit(apiEventNameBuilder(channelType, apiEventType), args)
 }
 
-export const apiCreateGameRoom = (socket: Socket, roomName: string, gameType: LangTranslationKey, user_id: string) => {
+export const apiCreateGameRoom = (socket: Socket, roomName: string, gameType: LangKey, user_id: string) => {
 	socket.emit(apiEventTypeToString(ApiEventType.NewRoom), { roomName, gameType, user_id })
 }
 

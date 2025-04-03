@@ -6,7 +6,7 @@ import { useAppSettings } from "@/components/providers/settings-provider"
 import { useSocketContext } from "@/components/providers/socket-provider"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { OlhoDonationType, PresidentLogType, PresidentPlayerState, PresidentPlayHandType, PresidentPosition, RoomStateBase, SoundName, Suit } from "@/enums"
+import { LangKey, OlhoDonationType, PresidentLogType, PresidentPlayerState, PresidentPlayHandType, PresidentPosition, RoomStateBase, SoundName, Suit } from "@/enums"
 import { useCallback, useEffect, useState } from "react"
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
@@ -163,7 +163,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 					type: "info",
 				})
 			}
-			else 
+			else
 				play_audio(audioName);
 		}
 		socket?.on("play_audio", handlePlayAudio)
@@ -223,13 +223,13 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 			<BannerQueue />
 			<div className={`size-full max-w-screen-lg flex flex-col items-center justify-between bg-center bg-no-repeat`}>
 				<div className="buttons flex justify-around w-64">
-					<Button variant="outline" onClick={handleGoBack}>Go back</Button>
+					<Button variant="outline" onClick={handleGoBack}>{lang(LangKey.GO_BACK)}</Button>
 					{presidentRoom?.state === RoomStateBase.ONGOING &&
 						<>{/* Donations Drawer and Game Logs */}
 							{presidentRoom?.hands[user?.id ?? ""].handSize !== 0 && presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral &&
 								<Collapsible>
 									<CollapsibleTrigger asChild>
-										<Button variant="outline">Donations Drawer</Button>
+										<Button variant="outline">{lang(LangKey.DONATIONS_DRAWER)}</Button>
 									</CollapsibleTrigger>
 									<CollapsibleContent>
 										<div className="donation-drawer-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
@@ -269,23 +269,23 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 							}
 							<Collapsible>
 								<CollapsibleTrigger asChild>
-									<Button variant="outline">Game Logs</Button>
+									<Button variant="outline">{lang(LangKey.LOGS)}</Button>
 								</CollapsibleTrigger>
 								<CollapsibleContent>
 									<div className="game-logs-content z-10 absolute right-0 w-80 bg-card border rounded-lg max-h-[500px] flex flex-col">
 										{Object.keys(presidentRoom?.logs ?? []).length === 0 ? (
 											<div className="log flex-1 flex items-center justify-center">
-												No logs yet!
+												{lang(LangKey.EMPTY)}
 											</div>
 										) : (
 											<div className="flex-1"> {/* Ensures the logs can scroll properly */}
 												{Object.keys(presidentRoom?.logs ?? []).map((logKey, index) => (
 													<div className="log-round flex flex-col" key={index}>
-														<span className="log-round-title">Round {parseInt(logKey)}</span>
+														<span className="log-round-title">{lang(LangKey.ROUND)} {parseInt(logKey)}</span>
 														<Separator />
 														<div className="overflow-y-auto custom-scrollbar max-h-[200px]"> {/* Set a reasonable height */}
 															{presidentRoom?.logs[parseInt(logKey)]?.length === 0 ? (
-																<span className="log-text">No one has played yet!</span>
+																<span className="log-text">{lang(LangKey.NO_ONE_PLAYED)}</span>
 															) : (
 																presidentRoom?.logs[parseInt(logKey)]?.map((log, index) => (
 																	<div className="log flex items-center w-full" key={index}>
@@ -343,8 +343,8 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						{/* Play and Skip buttons */}
 						{presidentRoom.state === RoomStateBase.ONGOING && presidentRoom.hands[user?.id ?? ""]?.state === PresidentPlayerState.PLAYING &&
 							<div className="absolute bottom-[-2rem] z-40 flex justify-evenly p-2 play-div /*border rounded-md bg-card*/">
-								<Button variant="outline" className="text-confirm" onClick={handlePlaySelectedCards}>Play Cards</Button>
-								<Button variant="outline" className="text-warning ml-4" onClick={handleSkipRound}>Skip</Button>
+								<Button variant="outline" className="text-confirm" onClick={handlePlaySelectedCards}>{lang(LangKey.PLAY_CARDS)}</Button>
+								<Button variant="outline" className="text-warning ml-4" onClick={handleSkipRound}>{lang(LangKey.SKIP)}</Button>
 							</div>
 						}
 					</div>
@@ -352,8 +352,8 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				{/* Players List */}
 				{presidentRoom && presidentRoom.state === RoomStateBase.IDLE &&
 					<div className="lobby-buttons z-40 flex w-52 align-center absolute bottom-[25%] justify-around">
-						{presidentRoom?.operator === user?.id && <Button onClick={handleGameStart} variant="outline" className="">Start</Button>}
-						<Button onClick={handleReadyButtonClick(userReady ?? false)} variant="outline">{userReady ? "Unready" : "Ready"}</Button>
+						{presidentRoom?.operator === user?.id && <Button onClick={handleGameStart} variant="outline" className="">{lang(LangKey.START)}</Button>}
+						<Button onClick={handleReadyButtonClick(userReady ?? false)} variant="outline">{lang(userReady ? LangKey.NOT_READY : LangKey.READY)}</Button>
 					</div>
 				}
 				{presidentRoom &&
@@ -365,7 +365,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 								<OlhoPlayerCard room={presidentRoom} player={u} user={player} />
 							</div>
 						})}
-						
+
 					</div>
 				}
 				<div className="relative cards z-30 w-full h-[14rem] mt-auto">

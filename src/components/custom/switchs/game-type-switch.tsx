@@ -7,11 +7,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useAppSettings } from '@/components/providers/settings-provider'
-import { LangTranslationKey } from '@/enums'
+import { LangKey } from '@/enums'
 
 type GameTypeSwitchProps = HTMLAttributes<HTMLDivElement> & {
-    value: number;
-    onChange: (value: number) => void;
+	value: number;
+	onChange: (value: number) => void;
 };
 
 const GameTypeSwitch: React.FC<GameTypeSwitchProps> = ({ value, onChange }) => {
@@ -23,14 +23,14 @@ const GameTypeSwitch: React.FC<GameTypeSwitchProps> = ({ value, onChange }) => {
 				<SelectValue placeholder={lang(value)} />
 			</SelectTrigger>
 			<SelectContent>
-                {Array.from({ length: LangTranslationKey.NUM - LangTranslationKey.OLHO }, (_, i) => i + LangTranslationKey.OLHO).map(key => (
-                    <SelectItem key={key} value={key.toString()}>
-                        <span className="flex items-center">
-                            <span className="ml-1 lang-name">{lang(key)}</span>
-                        </span>
-                    </SelectItem>
-                ))}
-            </SelectContent>
+				{Array.from({ length: LangKey.NUM - LangKey.OLHO }, (_, i) => i + LangKey.OLHO).map(key => (
+					<SelectItem key={key} value={key.toString()}>
+						<span className="flex items-center">
+							<span className="ml-1 lang-name">{lang(key)}</span>
+						</span>
+					</SelectItem>
+				))}
+			</SelectContent>
 		</Select>
 	)
 }

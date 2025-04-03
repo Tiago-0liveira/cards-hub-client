@@ -1,47 +1,47 @@
-import { LangTranslationKey, OlhoDonationType, PresidentPlayerState, PresidentPosition } from "../enums";
+import { LangKey, OlhoDonationType, PresidentPlayerState, PresidentPosition } from "../enums";
 
-export const presidentPlayerStateToLangKey = (state: PresidentPlayerState): LangTranslationKey => {
+export const presidentPlayerStateToLangKey = (state: PresidentPlayerState): LangKey => {
 	switch (state) {
 		case PresidentPlayerState.PASSED:
-			return LangTranslationKey.PASSED
+			return LangKey.PASSED
 		case PresidentPlayerState.WAITING:
-			return LangTranslationKey.WAITING
+			return LangKey.WAITING
 		case PresidentPlayerState.PLAYING:
-			return LangTranslationKey.PLAYING
+			return LangKey.PLAYING
 		case PresidentPlayerState.FINISHED:
-			return LangTranslationKey.FINNISHED
+			return LangKey.FINNISHED
 		case PresidentPlayerState.LEFTROOM:
-			return LangTranslationKey.LEFTROOM
+			return LangKey.LEFTROOM
 		default:
 			throw Error("Invalid presidentPlayerState")
 			break;
 	}
 }
 
-export const presidentPlayerPositionToLangKey = (state: PresidentPosition): LangTranslationKey => {
+export const presidentPlayerPositionToLangKey = (state: PresidentPosition): LangKey => {
 	switch (state) {
 		case PresidentPosition.PRESIDENT:
-			return LangTranslationKey.PRESIDENT
+			return LangKey.PRESIDENT
 		case PresidentPosition.VICE_PRESIDENT:
-			return LangTranslationKey.VICEPRESIDENT
+			return LangKey.VICEPRESIDENT
 		case PresidentPosition.Neutral:
-			return LangTranslationKey.NEUTRAL
+			return LangKey.NEUTRAL
 		case PresidentPosition.VICE_OLHO:
-			return LangTranslationKey.VICEOLHO
+			return LangKey.VICEOLHO
 		case PresidentPosition.OLHO:
-			return LangTranslationKey.OLHO
+			return LangKey.OLHO
 		default:
 			throw Error("Invalid presidentPlayerPosition")
 			break;
 	}
 }
 
-export const presidentDonationTypeToLangKey = (type: OlhoDonationType): LangTranslationKey => {
+export const presidentDonationTypeToLangKey = (type: OlhoDonationType): LangKey => {
 	switch (type) {
 		case OlhoDonationType.OUTGOING:
-			return LangTranslationKey.OUTGOING
+			return LangKey.OUTGOING
 		case OlhoDonationType.INCOMING:
-			return LangTranslationKey.INCOMING
+			return LangKey.INCOMING
 		default:
 			throw Error("Invalid presidentDonationType")
 			break;

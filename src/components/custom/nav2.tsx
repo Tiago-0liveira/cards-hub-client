@@ -3,7 +3,7 @@ import Heading from "./heading"
 import { useAppSettings } from "../providers/settings-provider"
 import LangSwitch from "./switchs/lang-switch"
 import ThemeSwitch from "./switchs/theme-switch"
-import { LangTranslationKey } from "@/enums"
+import { LangKey } from "@/enums"
 import { useSocketContext } from "../providers/socket-provider"
 import { Slider } from "../ui/slider"
 import { Volume1, Volume2, VolumeX } from "lucide-react"
@@ -25,12 +25,12 @@ const Nav2 = () => {
 		else
 			return <Volume2 />
 	}
-	
+
 	return (<nav className="nav-bar h-24 px-10 flex-grow w-full flex items-center bg-card text-card-foreground shadow">
 		<div className="header">
-			<Heading level={2} className="text-confirm">{lang(LangTranslationKey.WEBSITE_NAME)}</Heading>
+			<Heading level={2} className="text-confirm">{lang(LangKey.WEBSITE_NAME)}</Heading>
 			<div className="text-left text-muted-foreground">
-				{user === null ? lang(LangTranslationKey.LOGGED_OUT) : lang(LangTranslationKey.LOGGED_IN) + user.username}
+				{user === null ? lang(LangKey.LOGGED_OUT) : lang(LangKey.LOGGED_IN) + user.username}
 			</div>
 		</div>
 		<div className="settings flex flex-col justify-between items-center w-[400px] ml-auto">
