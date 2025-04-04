@@ -24,6 +24,7 @@ import { motion } from "framer-motion"
 import { useBanner } from "@/components/custom/banner-system/context"
 import { BannerQueue } from "@/components/custom/banner-system/queue"
 import OlhoJokerBanner from "@/components/custom/banner-system/banners/olho-joker-banner"
+import olhoJokerBanner from "@/components/custom/banner-system/banners/olho-joker-banner"
 
 const playerCardsPositions = [
 	["top-[80%] left-[10%]"],/* bottom left */
@@ -157,11 +158,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	useEffect(() => {
 		const handlePlayAudio = (audioName: SoundName) => {
 			if (audioName === SoundName.JOKER) {
-				addBanner({
-					content: <OlhoJokerBanner />,
-					duration: 2000,
-					type: "info",
-				})
+				addBanner(olhoJokerBanner)
 			}
 			else
 				play_audio(audioName);

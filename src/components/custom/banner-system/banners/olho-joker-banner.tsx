@@ -20,4 +20,8 @@ const OlhoJokerBanner = () => {
 	</div>
 }
 
-export default OlhoJokerBanner
+export default {
+	content: <OlhoJokerBanner />,
+	duration: 1500,
+	id: "olho-joker-banner"
+}

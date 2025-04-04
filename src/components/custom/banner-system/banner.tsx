@@ -61,7 +61,7 @@ const Banner: React.FC<BannerProps> = ({ banner, onComplete, isActive }) => {
 	return (
 		<div
 			className={cn(
-				"fixed top-[23%] left-1/2 transform -translate-x-1/2 z-50",
+				"fixed top-[23%] left-1/2 transform -translate-x-1/2 z-0",
 				"px-6 py-3 rounded-lg text-white font-medium",
 				"transition-all duration-500 w-full flex flex-col items-center justify-center",
 				animationClasses[animationState],
