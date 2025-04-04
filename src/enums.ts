@@ -58,7 +58,9 @@ export enum LangKey {
 	START,
 	GO_BACK,
 	READY,
-	NOT_READY
+	NOT_READY,
+	CONNECTING_TO_SERVER,
+	COULD_NOT_CONNECT_TO_SERVER,
 }
 
 export enum GameChannelType {

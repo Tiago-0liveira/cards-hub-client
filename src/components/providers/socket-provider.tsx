@@ -33,7 +33,6 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 		const socketInstance = io(import.meta.env.VITE_SERVER_ENDPOINT);
 		
 		socketInstance.on("userUpdate", ({ user }) => {
-			console.log("userUpdate: ", user)
 			setUser(user)
 			localStorage.setItem("user", JSON.stringify(user))
 		})
@@ -69,7 +68,6 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 		const localUser = localStorage.getItem("user")
 		if (localUser !== null) {
-			console.log("user: ", localUser, JSON.parse(localUser))
 			apiGetUserId(socketInstance, (JSON.parse(localUser) as User).id)
 		} else {
 			setDialogOpen(true)
@@ -91,7 +89,11 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	}, []);
 
 	useEffect(() => {
-		if (!socket) return;
+		if (!socket || !socket.connected) {
+			navigate("/")
+			setRooms([])
+			return
+		};
 		socket.on("enterRoom", (arg: { room: Room }) => {
 			navigate(`/room/${arg.room.type}/${arg.room.id}`)
 		})
@@ -106,12 +108,12 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 			socket.off("goToLobby");
 			socket.off("disconnect");
 		}
-	}, [socket, navigate])
+	}, [socket, socket?.connected, navigate])
 
 	return (
 		<SocketContext.Provider value={{ socket, rooms, setRooms, user }}>
 			<Toaster />
-			<CreateUserDialog onSubmit={handleFormData} setOpen={setDialogOpen} open={dialogOpen} user={user} />
+			<CreateUserDialog onSubmit={handleFormData} setOpen={setDialogOpen} open={dialogOpen} user={user} socket={socket} />
 			{children}
 		</SocketContext.Provider>
 	);

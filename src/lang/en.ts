@@ -49,5 +49,7 @@ export default {
 		[LangKey.GO_BACK]: "Go back",
 		[LangKey.READY]: "Ready",
 		[LangKey.NOT_READY]: "Not ready",
+		[LangKey.CONNECTING_TO_SERVER]: "Connecting to server",
+		[LangKey.COULD_NOT_CONNECT_TO_SERVER]: "Could not connect to server",
 	}
 } as Lang
