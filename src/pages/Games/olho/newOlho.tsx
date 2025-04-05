@@ -20,7 +20,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import Nav2 from "@/components/custom/nav2"
 import React from "react"
 import OlhoPlayerCard from "@/components/custom/olho/playerCard"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from 'framer-motion'
 import { useBanner } from "@/components/custom/banner-system/context"
 import { BannerQueue } from "@/components/custom/banner-system/queue"
 import OlhoJokerBanner from "@/components/custom/banner-system/banners/olho-joker-banner"
@@ -365,29 +365,78 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 
 					</div>
 				}
-				<div className="relative cards z-30 w-full h-[14rem] mt-auto">
-					<div className="absolute size-full hover:translate-y-20 duration-150 translate-y-36">
-						{presidentRoom?.state === RoomStateBase.ONGOING && presidentRoom?.hands[user?.id ?? ""]?.hand.map((card, index, arr) => {
-							const cardImgPath = getCardSrc(card)
-							return (<div
-								className={"card absolute w-26 hover:!translate-y-[-10rem]  rounded-xl  duration-300 animate-in animate-out delay-50"}
-								style={{
-									left: `${index * 81 / arr.length - 4}%`,
-									transform: `translateX(${index * 13}px) translateY(${arr.length / 2 - index}px) rotate(${(index - arr.length / 2) * 3}deg)`
-								}}
-								key={`${card.value}-${card.suit}-${index}`}
-								onClick={handleCardClick(card)}
-							>
-								<img src={cardImgPath} alt={cardImgPath}
-									className={`
-											rounded-xl
-											${selectedCards.some(c => c.value === card.value && c.suit === card.suit) && "glowing-border glow-blue glow-lg"}
-										`}
-								/>
-							</div>)
-						})}
-					</div>
+				<div className="relative w-full flex justify-center items-center h-64">
+					<motion.div 
+						className="relative w-[1000px] flex justify-center h-full"
+						initial={{
+							translateY: 100,
+						}}
+						animate={{
+							translateY: 60,
+						}}
+						whileHover={{
+							translateY: -20,
+							transition: {
+								type: "tween",
+								duration: 0.3,
+								ease: "easeInOut"
+							}
+						}}
+					>
+						<AnimatePresence>
+							{presidentRoom?.state === RoomStateBase.ONGOING &&
+								presidentRoom?.hands[user?.id ?? ""]?.hand.map((card, index, arr) => {
+									const total = arr.length;
+									const center = (total - 1) / 2;
+
+									const offset = index - center; // centralizes card layout
+									const radius = 30; // adjust to spread more or less
+									const angle = offset * (radius / total); // rotational spread
+									const horizontalShift = offset * 55; // space between cards — tweak as needed
+
+									return (
+										<motion.div
+											className={cx(
+												"absolute top-0 w-56 rounded-md ",
+												{
+													"glowing-border glow-blue glow-lg": selectedCards.some((c) => c.value === card.value && c.suit === card.suit)
+												}
+											)}
+											key={`${card.value}-${card.suit}`}
+											onClick={handleCardClick(card)}
+											initial={{
+												translateY: 100,
+												opacity: 0,
+												transition: { duration: 0.35, staggerChildren: 0.1 }
+											}}
+											animate={{
+												opacity: 1,
+												translateX: `${horizontalShift}px`,
+												rotate: `${angle}deg`,
+												transition: { duration: 0.3, type: "keyframes", ease: "circInOut", stiffness: 100, damping: 100 },
+											}}
+											exit={{ 
+												opacity: 0
+											}}
+											whileHover={{
+												translateY: -50,
+												rotate: `${angle / 2.5}deg`,
+												transition: { duration: 0.25, type: "keyframes", ease: "easeOut" },
+											}}
+										>
+											<img
+												src={getCardSrc(card)}
+												alt={getCardSrc(card)}
+												className={cx("w-full rounded-md")}
+											/>
+										</motion.div>
+									);
+								})}
+						</AnimatePresence>
+					</motion.div>
+
 				</div>
+
 			</div>
 		</div>
 	)
