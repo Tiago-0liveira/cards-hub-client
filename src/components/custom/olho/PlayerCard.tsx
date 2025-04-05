@@ -103,13 +103,15 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 							key={index}
 							src={"/svg/cards/back.svg"}
 							className="absolute aspect-auto h-14"
+							initial={{
+								opacity: 1,
+							}}
 							style={{
 								left: `${index * 21 / cardCount}%`,
 								transform: `translateX(${index * 11}px) translateY(${cardCount / 2}px) rotate(${(index - cardCount / 2) * 6}deg)`
 							}}
 							exit={{
-								x: 50,
-								opacity: 0
+								opacity: 0,
 							}}
 						/>
 					))}
