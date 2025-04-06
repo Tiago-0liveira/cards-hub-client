@@ -311,6 +311,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 									const horizontalShift = offset * 55; // space between cards — tweak as needed
 
 									return <DynamicCard
+										key={`${card.value}-${card.suit}`}
 										angle={angle} 
 										horizontalShift={horizontalShift} 
 										selected={selectedCards.some(c => c.suit === card.suit && c.value === card.value)} 

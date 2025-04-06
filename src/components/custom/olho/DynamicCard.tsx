@@ -18,7 +18,6 @@ const DynamicCard: React.FC<DynamicCardProps> = ({ selected, card, handleCardCli
 				"absolute top-0 w-56 rounded-md will-change-transform",
 				{ "glowing-border glow-blue glow-lg": selected }
 			)}
-			key={`${card.value}-${card.suit}`}
 			onClick={handleCardClick(card)}
 			initial={{
 				translateY: 100,
