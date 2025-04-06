@@ -1,30 +1,29 @@
 import { apiPresidentPlayHand, apiPresidentRoomGetInfo, apiPresidentRoomStartGame, apiPresidentSkipHand, cards_value_compare } from "@/api/games/olho"
 import { apiGameRoomSetUserReady, apiLeaveGameRoom } from "@/api/general"
 import { getCardSrc } from "@/assetsManager"
-import Heading from "@/components/custom/heading"
 import { useAppSettings } from "@/components/providers/settings-provider"
 import { useSocketContext } from "@/components/providers/socket-provider"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { LangKey, OlhoDonationType, PresidentLogType, PresidentPlayerState, PresidentPlayHandType, PresidentPosition, RoomStateBase, SoundName, Suit } from "@/enums"
+import { LangKey, PresidentLogType, PresidentPlayerState, PresidentPlayHandType, PresidentPosition, RoomStateBase, SoundName, Suit } from "@/enums"
 import { useCallback, useEffect, useState } from "react"
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Socket } from "socket.io-client"
 import { cx } from "class-variance-authority"
 import { toast } from "sonner"
-import { presidentDonationTypeToLangKey, presidentPlayerPositionToLangKey, presidentPlayerStateToLangKey, PresidentPlayerStateToTailwindClasses, PresidentPositionToTailwindClasses } from "@/utils/olho"
-import Nav from "@/components/custom/nav"
-import { Crown, Hand as HandIcon } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { presidentPlayerPositionToLangKey, PresidentPositionToTailwindClasses } from "@/utils/olho"
+
 import Nav2 from "@/components/custom/nav2"
 import React from "react"
 import OlhoPlayerCard from "@/components/custom/olho/playerCard"
 import { AnimatePresence, motion } from 'framer-motion'
 import { useBanner } from "@/components/custom/banner-system/context"
-import { BannerQueue } from "@/components/custom/banner-system/queue"
-import OlhoJokerBanner from "@/components/custom/banner-system/banners/olho-joker-banner"
+import BannerQueue from "@/components/custom/banner-system/queue"
 import olhoJokerBanner from "@/components/custom/banner-system/banners/olho-joker-banner"
+import DonationsDrawer from "@/components/custom/olho/DonationsDrawer"
+import GameLogs from "@/components/custom/olho/GameLogs"
+import DynamicCard from "@/components/custom/olho/DynamicCard"
 
 const playerCardsPositions = [
 	["top-[80%] left-[10%]"],/* bottom left */
@@ -223,89 +222,10 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 					<Button variant="outline" onClick={handleGoBack}>{lang(LangKey.GO_BACK)}</Button>
 					{presidentRoom?.state === RoomStateBase.ONGOING &&
 						<>{/* Donations Drawer and Game Logs */}
-							{presidentRoom?.hands[user?.id ?? ""].handSize !== 0 && presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral &&
-								<Collapsible>
-									<CollapsibleTrigger asChild>
-										<Button variant="outline">{lang(LangKey.DONATIONS_DRAWER)}</Button>
-									</CollapsibleTrigger>
-									<CollapsibleContent>
-										<div className="donation-drawer-content z-10 absolute w-80 -translate-x-1/4 bg-card border rounded-lg">
-											<div className="donation-incoming size-full">
-												<div className="h-10 py-2">
-													<span className="">
-														{lang(presidentDonationTypeToLangKey(OlhoDonationType.INCOMING))}
-													</span>
-												</div>
-												<Separator />
-												<div className="cards flex justify-evenly m-4">
-													{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.INCOMING)?.cards.map(card => {
-														const cardSrc = getCardSrc(card)
-														return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} />)
-													})}
-												</div>
-											</div>
-											<Separator />
-											<div className="donation-outgoing ">
-												<div className="h-10 py-2">
-													<span className="">
-														{lang(presidentDonationTypeToLangKey(OlhoDonationType.OUTGOING))}
-													</span>
-												</div>
-
-												<Separator />
-												<div className="cards flex justify-evenly m-4">
-													{presidentRoom?.hands[user?.id ?? ""]?.donations.find(d => d.type === OlhoDonationType.OUTGOING)?.cards.map(card => {
-														const cardSrc = getCardSrc(card)
-														return (<img className="w-20 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />)
-													})}
-												</div>
-											</div>
-										</div>
-									</CollapsibleContent>
-								</Collapsible>
+							{presidentRoom?.hands[user?.id ?? ""].handSize !== 0 && presidentRoom?.hands[user?.id ?? ""]?.position !== PresidentPosition.Neutral && user &&
+								<DonationsDrawer presidentRoom={presidentRoom} user={user} />
 							}
-							<Collapsible>
-								<CollapsibleTrigger asChild>
-									<Button variant="outline">{lang(LangKey.LOGS)}</Button>
-								</CollapsibleTrigger>
-								<CollapsibleContent>
-									<div className="game-logs-content z-10 absolute right-0 w-80 bg-card border rounded-lg max-h-[500px] flex flex-col">
-										{Object.keys(presidentRoom?.logs ?? []).length === 0 ? (
-											<div className="log flex-1 flex items-center justify-center">
-												{lang(LangKey.EMPTY)}
-											</div>
-										) : (
-											<div className="flex-1"> {/* Ensures the logs can scroll properly */}
-												{Object.keys(presidentRoom?.logs ?? []).map((logKey, index) => (
-													<div className="log-round flex flex-col" key={index}>
-														<span className="log-round-title">{lang(LangKey.ROUND)} {parseInt(logKey)}</span>
-														<Separator />
-														<div className="overflow-y-auto custom-scrollbar max-h-[200px]"> {/* Set a reasonable height */}
-															{presidentRoom?.logs[parseInt(logKey)]?.length === 0 ? (
-																<span className="log-text">{lang(LangKey.NO_ONE_PLAYED)}</span>
-															) : (
-																presidentRoom?.logs[parseInt(logKey)]?.map((log, index) => (
-																	<div className="log flex items-center w-full" key={index}>
-																		<div className="player w-20">{log.player_username}</div>
-																		<div className="hand flex flex-1 justify-around">
-																			{log.hand.cards?.map((card) => {
-																				const cardSrc = getCardSrc(card);
-																				return <img className="w-10 rounded-sm" src={cardSrc} alt={cardSrc} key={cardSrc} />;
-																			})}
-																		</div>
-																	</div>
-																))
-															)}
-														</div>
-														<Separator />
-													</div>
-												))}
-											</div>
-										)}
-									</div>
-
-								</CollapsibleContent>
-							</Collapsible>
+							<GameLogs presidentRoom={presidentRoom} />
 						</>}
 				</div>
 				{presidentRoom && presidentRoom.state === RoomStateBase.ONGOING &&
@@ -390,43 +310,13 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 									const angle = offset * (radius / total); // rotational spread
 									const horizontalShift = offset * 55; // space between cards — tweak as needed
 
-									return (
-										<motion.div
-											className={cx(
-												"absolute top-0 w-56 rounded-md ",
-												{
-													"glowing-border glow-blue glow-lg": selectedCards.some((c) => c.value === card.value && c.suit === card.suit)
-												}
-											)}
-											key={`${card.value}-${card.suit}`}
-											onClick={handleCardClick(card)}
-											initial={{
-												translateY: 100,
-												opacity: 0,
-												transition: { duration: 0.35, staggerChildren: 0.1 }
-											}}
-											animate={{
-												opacity: 1,
-												translateX: `${horizontalShift}px`,
-												rotate: `${angle}deg`,
-												transition: { duration: 0.3, type: "keyframes", ease: "circInOut", stiffness: 100, damping: 100 },
-											}}
-											exit={{ 
-												opacity: 0
-											}}
-											whileHover={{
-												translateY: -50,
-												rotate: `${angle / 2.5}deg`,
-												transition: { duration: 0.25, type: "keyframes", ease: "easeOut" },
-											}}
-										>
-											<img
-												src={getCardSrc(card)}
-												alt={getCardSrc(card)}
-												className={cx("w-full rounded-md")}
-											/>
-										</motion.div>
-									);
+									return <DynamicCard
+										angle={angle} 
+										horizontalShift={horizontalShift} 
+										selected={selectedCards.some(c => c.suit === card.suit && c.value === card.value)} 
+										card={card} 
+										handleCardClick={handleCardClick}
+									/>
 								})}
 						</AnimatePresence>
 					</motion.div>

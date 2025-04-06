@@ -1,9 +1,9 @@
-import type React from "react"
+import React from "react"
 import { useState, useEffect } from "react"
 import { useBanner } from "./context"
 import Banner from "./banner"
 
-export const BannerQueue: React.FC = () => {
+const BannerQueue: React.FC = () => {
 	const { banners, removeBanner } = useBanner()
 	const [activeBannerId, setActiveBannerId] = useState<string | null>(null)
 
@@ -35,3 +35,4 @@ export const BannerQueue: React.FC = () => {
 	)
 }
 
+export default React.memo(BannerQueue)

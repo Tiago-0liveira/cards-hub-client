@@ -172,4 +172,4 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 	)
 }
 
-export default OlhoPlayerCard
+export default React.memo(OlhoPlayerCard)
