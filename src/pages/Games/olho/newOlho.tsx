@@ -287,7 +287,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				}
 				<div className="relative w-full flex justify-center items-center h-64">
 					<motion.div 
-						className="relative w-[1000px] flex justify-center h-full"
+						className="relative w-[1000px] flex justify-center h-full z-10"
 						initial={{ translateY: 100	}} 
 						animate={{ translateY: 60 }}
 						whileHover={{

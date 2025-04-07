@@ -83,7 +83,7 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 
 	return (
 		<div className="OlhoPlayerCard relative w-60 h-28 flex items-center justify-center">
-			<Avatar className={cx("player-image absolute z-20 top-[12%] left-[-3%] w-14 h-14")}>
+			<Avatar className={cx("player-image absolute z-[3] top-[12%] left-[-3%] w-14 h-14")}>
 				<AvatarImage src={`https://api.dicebear.com/7.x/adventurer/png?seed=${user.socketId}`} alt="api.dicebear.com fetched avatar" />
 				<AvatarFallback>CN</AvatarFallback>
 			</Avatar>
@@ -93,7 +93,7 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 				whileHover={{ y: -40 }}
 			>
 				{cardCount !== 0 && 
-					<div className="relative z-[2] cards-num font-ubuntu bg-olhoPlayer flex items-center justify-center rounded-lg h-8 w-8 left-[50%] top-[71%] translate-x-[-50%] translate-y-[-50%]">
+					<div className="relative z-[1] cards-num font-ubuntu bg-olhoPlayer flex items-center justify-center rounded-lg h-8 w-8 left-[50%] top-[71%] translate-x-[-50%] translate-y-[-50%]">
 						<span>{player.handSize}</span>
 					</div>
 				}
@@ -117,7 +117,7 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 					))}
 				</AnimatePresence>
 			</motion.div>
-			<div className={cx("black-box relative z-10 rounded-full bg-olhoPlayer p-2 flex items-center justify-normal w-56 h-12 shadow-2xl")}>
+			<div className={cx("black-box relative z-[2] rounded-full bg-olhoPlayer p-2 flex items-center justify-normal w-56 h-12 shadow-2xl")}>
 				<TooltipProvider delayDuration={100}>
 					<Tooltip>
 						<TooltipTrigger asChild>
