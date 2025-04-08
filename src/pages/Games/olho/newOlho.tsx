@@ -24,6 +24,7 @@ import olhoJokerBanner from "@/components/custom/banner-system/banners/olho-joke
 import DonationsDrawer from "@/components/custom/olho/DonationsDrawer"
 import GameLogs from "@/components/custom/olho/GameLogs"
 import DynamicCard from "@/components/custom/olho/DynamicCard"
+import useElementWidth from "@/components/hooks/useElementWidth"
 
 const playerCardsPositions = [
 	["top-[80%] left-[10%]"],/* bottom left */
@@ -53,6 +54,8 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 	const [selectedCards, setSelectedCards] = useState<Card[]>([])
 	const navigate = useNavigate()
 	const { addBanner } = useBanner()
+	const cardsDivRef = React.useRef<HTMLDivElement>(null)
+	const cardsDivWidth = useElementWidth(cardsDivRef, 1000)
 	const userReady = useMemo(() => {
 		const uReady = presidentRoom?.players.find(p => p.id === user?.id)
 		return uReady?.ready
@@ -217,7 +220,7 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 		<div className="olho size-full flex flex-col items-center bg-[url(/olho-background2.png)] bg-center bg-no-repeat bg-cover">
 			<Nav2 />
 			<BannerQueue />
-			<div className={`size-full max-w-screen-lg flex flex-col items-center justify-between bg-center bg-no-repeat`}>
+			<div className={`size-full max-w-screen-xl flex flex-col items-center justify-between bg-center bg-no-repeat`}>
 				<div className="buttons flex justify-around w-64">
 					<Button variant="outline" onClick={handleGoBack}>{lang(LangKey.GO_BACK)}</Button>
 					{presidentRoom?.state === RoomStateBase.ONGOING &&
@@ -287,7 +290,8 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 				}
 				<div className="relative w-full flex justify-center items-center h-64">
 					<motion.div 
-						className="relative w-[1000px] flex justify-center h-full z-10"
+						className="relative w-[90%] flex justify-center h-full z-10"
+						ref={cardsDivRef}
 						initial={{ translateY: 100	}} 
 						animate={{ translateY: 60 }}
 						whileHover={{
@@ -306,9 +310,10 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 									const center = (total - 1) / 2;
 
 									const offset = index - center; // centralizes card layout
-									const radius = 30; // adjust to spread more or less
+									const radius = Math.max(8, 30 * arr.length / Math.round(54.0 / presidentRoom.playerOrder.length));
+									
 									const angle = offset * (radius / total); // rotational spread
-									const horizontalShift = offset * 55; // space between cards — tweak as needed
+									const horizontalShift = offset * cardsDivWidth / 18; // space between cards — tweak as needed
 
 									return <DynamicCard
 										key={`${card.value}-${card.suit}`}
