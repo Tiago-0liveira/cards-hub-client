@@ -99,4 +99,4 @@ const CreateUserDialog: React.FC<CreateUserDialog> = (props) => {
 	);
 }
 
-export default CreateUserDialog;
+export default React.memo(CreateUserDialog);

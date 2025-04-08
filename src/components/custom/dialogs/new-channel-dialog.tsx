@@ -99,4 +99,4 @@ const NewChannelDialog: React.FC<NewChannelDialog> = (props) => {
 	);
 }
 
-export default NewChannelDialog;
+export default React.memo(NewChannelDialog);
