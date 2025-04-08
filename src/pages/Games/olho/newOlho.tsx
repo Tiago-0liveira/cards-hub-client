@@ -246,18 +246,25 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						}
 
 						{/* LastPlayer hand */}
-						<div className="hand flex">
-							{presidentRoom.currentHand.length !== 0 && presidentRoom.currentHand[presidentRoom.currentHand.length - 1].map((card, index) => {
-								const hand = presidentRoom.currentHand[presidentRoom.currentHand.length - 1] as Card[]
-								const csrc = getCardSrc(card)
-								return <img className="w-24 rounded-sm duration-300 animate-in animate-out"
-									style={{
-										left: `${index * 81 / hand.length - 4}%`,
-										transform: `translateX(${index * 13}px) rotate(${(index - hand.length / 2) * 2}deg)`
-									}}
-									src={csrc} alt={csrc} key={csrc}
-								/>
-							})}
+						<div className="hand relative h-40 flex justify-center w-[420px]">
+							<AnimatePresence mode="wait">
+								{presidentRoom.currentHand.length !== 0 && presidentRoom.currentHand[presidentRoom.currentHand.length - 1].map((card, index, arr) => {
+									const hand = presidentRoom.currentHand[presidentRoom.currentHand.length - 1] as Card[]
+									const csrc = getCardSrc(card)
+									
+									const total = arr.length;
+									const center = (total - 1) / 2;
+									const offset = index - center;
+									const horizontalShift = offset * 420 / 16;
+
+									return <motion.img className="w-24 absolute rounded-sm will-change-transform"
+										initial={{ opacity: 0.15, x: horizontalShift / 1.5, rotate: 0 }}
+										animate={{ opacity: 1, x: horizontalShift, rotate: (index - hand.length / 2) * 1.5, transition: { duration: 0.35, type: "tween" } }}
+										exit={{ opacity: 0, right: 0 }}
+										src={csrc} alt={csrc} key={csrc}
+									/>
+								})}
+							</AnimatePresence>
 						</div>
 
 						{/* Play and Skip buttons */}
