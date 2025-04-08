@@ -10,7 +10,7 @@ import { SocketProvider } from '@/components/providers/socket-provider'
 
 if (import.meta.env.DEV) {
 	import("react-scan").then(({useScan}) => {
-		useScan()
+		useScan({ enabled: false })
 	});
 }
 
