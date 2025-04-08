@@ -3,7 +3,7 @@ import { PresidentPlayerState, RoomStateBase } from '@/enums'
 import { presidentPlayerPositionToLangKey, PresidentPlayerStateToTailwindClasses, PresidentPositionToTailwindClasses, UserReadyStateToTailwindClasses } from '@/utils/olho'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cx } from 'class-variance-authority'
-import React, { useState } from 'react'
+import React, { PropsWithChildren, useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AnimatePresence, motion } from 'framer-motion'
 import { CrownIcon } from 'lucide-react';
@@ -68,6 +68,90 @@ const getCircleTooltip = (room: PresidentRoom, player: PresidentPlayer, user: Us
 	}
 }
 
+const PlayerCardCardsHand: React.FC<{ handSize: number, maxDisplayedCards: number }> = ({ handSize, maxDisplayedCards }) => {
+	const cardCount = handSize > maxDisplayedCards ? maxDisplayedCards : handSize;
+
+	return <motion.div
+		className={cx("absolute z-0 flex w-36 h-12")}
+		initial={{ x: 10, y: -17 }}
+		whileHover={{ y: -40 }}
+	>
+		{handSize !== 0 && 
+			<div className="relative z-[1] cards-num font-ubuntu bg-olhoPlayer flex items-center justify-center rounded-lg h-8 w-8 left-[50%] top-[71%] translate-x-[-50%] translate-y-[-50%]">
+				<span>{handSize}</span>
+			</div>
+		}
+		<AnimatePresence>
+			{Array(cardCount).fill(5).map((_, index) => (
+				<motion.img
+					key={index}
+					src={"/svg/cards/back.svg"}
+					className="absolute aspect-auto h-14"
+					initial={{
+						opacity: 1,
+					}}
+					style={{
+						left: `${index * 21 / cardCount}%`,
+						transform: `translateX(${index * 11}px) translateY(${cardCount / 2}px) rotate(${(index - cardCount / 2) * 6}deg)`
+					}}
+					exit={{
+						opacity: 0,
+					}}
+				/>
+			))}
+		</AnimatePresence>
+	</motion.div>
+}
+
+const PlayerCardUsernameWithTooltip: React.FC<{ username: string, operator: boolean }> = ({ username, operator }) => {
+	return (
+		<TooltipProvider delayDuration={100}>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span className="player-name font-ubuntu flex-1 text-xl text-left pl-10 p-2">
+						{operator && <CrownIcon className="absolute text-yellow-500 translate-y-[-10px] translate-x-[-10px] rotate-[-9deg]" size={"20px"}/>}
+						<span className={cx({"text-yellow-500": operator})}>
+							{username.slice(0, 12)}{username.length > 12 && ".."}
+						</span>
+					</span>
+				</TooltipTrigger>
+				<TooltipContent className="bg-olhoPlayer text-white">
+					<span className={cx({"text-yellow-500": operator})}>
+						{username}
+					</span>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	)
+}
+
+const PlayerCardStatusCircleWithTooltip: React.FC<{ room: PresidentRoom, player: PresidentPlayer, user: User }> = ({ room, player, user }) => {
+	return (
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<span className={cx("relative p-2 m-2 w-5 h-5 rounded-full inline-block overflow-hidden",
+					{ "glowing-border glow-green glow-lg": room.lastPlayer === user.id }
+				)}>
+					<span className={cx("absolute top-0 left-0 w-1/2 h-full", getCircleColor(room, player, user))}></span>
+					<span className={cx("absolute top-0 right-0 w-1/2 h-full",
+						player.state === PresidentPlayerState.LEFTROOM ? getCircleColor(room, player, user, true) : getCircleColor(room, player, user))
+					}>
+					</span>
+				</span>
+			</TooltipTrigger>
+			<TooltipContent className="bg-olhoPlayer">
+				<span className={cx("circle-tooltip")}>
+					<span className={cx("left", room.state === RoomStateBase.ONGOING ? PresidentPlayerStateToTailwindClasses(player.state) : UserReadyStateToTailwindClasses(user.ready))}>{getCircleTooltip(room, player, user)}</span>
+					{room.state === RoomStateBase.ONGOING && player.state === PresidentPlayerState.LEFTROOM && <>
+						<span className="p-2 text-gray-400">/</span>
+						<span className={cx("right", PresidentPlayerStateToTailwindClasses(player.lastState))}>{getCircleTooltip(room, player, user, true)}</span>
+					</>}
+				</span>
+			</TooltipContent>
+		</Tooltip>
+	)
+}
+
 const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) => {
 	const { lang } = useAppSettings()
 
@@ -78,7 +162,6 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 		if (player.handSize === 0) return false
 		return true
 	}
-	const cardCount = player.handSize > 7 ? 7 : player.handSize
 	const boxHidden = getHiddenState()
 
 	return (
@@ -87,75 +170,11 @@ const OlhoPlayerCard: React.FC<OlhoPlayerCardProps> = ({ room, player, user }) =
 				<AvatarImage src={`https://api.dicebear.com/7.x/adventurer/png?seed=${user.socketId}`} alt="api.dicebear.com fetched avatar" />
 				<AvatarFallback>CN</AvatarFallback>
 			</Avatar>
-			<motion.div
-				className={cx("absolute z-0 flex w-36 h-12")}
-				initial={{ x: 10, y: -17 }}
-				whileHover={{ y: -40 }}
-			>
-				{cardCount !== 0 && 
-					<div className="relative z-[1] cards-num font-ubuntu bg-olhoPlayer flex items-center justify-center rounded-lg h-8 w-8 left-[50%] top-[71%] translate-x-[-50%] translate-y-[-50%]">
-						<span>{player.handSize}</span>
-					</div>
-				}
-				<AnimatePresence>
-					{Array(cardCount).fill(5).map((_, index) => (
-						<motion.img
-							key={index}
-							src={"/svg/cards/back.svg"}
-							className="absolute aspect-auto h-14"
-							initial={{
-								opacity: 1,
-							}}
-							style={{
-								left: `${index * 21 / cardCount}%`,
-								transform: `translateX(${index * 11}px) translateY(${cardCount / 2}px) rotate(${(index - cardCount / 2) * 6}deg)`
-							}}
-							exit={{
-								opacity: 0,
-							}}
-						/>
-					))}
-				</AnimatePresence>
-			</motion.div>
+			<PlayerCardCardsHand handSize={player.handSize} maxDisplayedCards={7}/>
 			<div className={cx("black-box relative z-[2] rounded-full bg-olhoPlayer p-2 flex items-center justify-normal w-56 h-12 shadow-2xl")}>
 				<TooltipProvider delayDuration={100}>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<span className="player-name font-ubuntu flex-1 text-xl text-left pl-10 p-2">
-								{room.operator === user.id && <CrownIcon className="absolute text-yellow-500 translate-y-[-10px] translate-x-[-10px] rotate-[-9deg]" size={"20px"}/>}
-								<span className={cx({"text-yellow-500": room.operator === user.id})}>
-									{user.username.slice(0, 12)}{user.username.length > 12 && ".."}
-								</span>
-							</span>
-						</TooltipTrigger>
-						<TooltipContent className="bg-olhoPlayer text-white">
-							<span className={cx({"text-yellow-500": room.operator === user.id})}>
-								{user.username}
-							</span>
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<span className={cx("relative p-2 m-2 w-5 h-5 rounded-full inline-block overflow-hidden",
-								{ "glowing-border glow-green glow-lg": room.lastPlayer === user.id }
-							)}>
-								<span className={cx("absolute top-0 left-0 w-1/2 h-full", getCircleColor(room, player, user))}></span>
-								<span className={cx("absolute top-0 right-0 w-1/2 h-full",
-									player.state === PresidentPlayerState.LEFTROOM ? getCircleColor(room, player, user, true) : getCircleColor(room, player, user))
-								}>
-								</span>
-							</span>
-						</TooltipTrigger>
-						<TooltipContent className="bg-olhoPlayer">
-							<span className={cx("circle-tooltip")}>
-								<span className={cx("left", room.state === RoomStateBase.ONGOING ? PresidentPlayerStateToTailwindClasses(player.state) : UserReadyStateToTailwindClasses(user.ready))}>{getCircleTooltip(room, player, user)}</span>
-								{room.state === RoomStateBase.ONGOING && player.state === PresidentPlayerState.LEFTROOM && <>
-									<span className="p-2 text-gray-400">/</span>
-									<span className={cx("right", PresidentPlayerStateToTailwindClasses(player.lastState))}>{getCircleTooltip(room, player, user, true)}</span>
-								</>}
-							</span>
-						</TooltipContent>
-					</Tooltip>
+					<PlayerCardUsernameWithTooltip username={user.username} operator={room.operator === user.id}/>
+					<PlayerCardStatusCircleWithTooltip room={room} player={player} user={user}/>
 				</TooltipProvider>
 			</div>
 			<motion.div 
