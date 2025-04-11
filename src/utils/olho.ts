@@ -57,7 +57,7 @@ export const PresidentPlayerStateToTailwindClasses = (state: PresidentPlayerStat
 		case PresidentPlayerState.PLAYING:
 			return "text-confirm"
 		case PresidentPlayerState.FINISHED:
-			return "text-confirm"
+			return "text-blue-500"
 		case PresidentPlayerState.LEFTROOM:
 			return "text-destructive"
 		default:
