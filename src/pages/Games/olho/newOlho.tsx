@@ -238,10 +238,6 @@ const Olho: React.FC<GameComponentProps> = ({ roomId }) => {
 						{presidentRoom.lastPlayer !== "" &&
 							<div className="absolute top-2 h-10 lastplay-by border rounded-md bg-olhoPlayer flex items-center">
 								<span className="p-4 lastplayer-name">{presidentRoom.players.find(u => u.id === presidentRoom.lastPlayer)?.username}</span>
-								<Separator className="" orientation="vertical" />
-								<span className={cx("p-4 lastplayer-rank", PresidentPositionToTailwindClasses(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}>
-									{lang(presidentPlayerPositionToLangKey(presidentRoom.hands[presidentRoom.lastPlayer]?.position))}
-								</span>
 							</div>
 						}
 
