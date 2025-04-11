@@ -3,7 +3,7 @@ import { PresidentPlayerState, RoomStateBase } from '@/enums'
 import { presidentPlayerPositionToLangKey, PresidentPlayerStateToTailwindClasses, PresidentPositionToTailwindClasses, UserReadyStateToTailwindClasses } from '@/utils/olho'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cx } from 'class-variance-authority'
-import React, { PropsWithChildren, useState } from 'react'
+import React from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AnimatePresence, motion } from 'framer-motion'
 import { CrownIcon } from 'lucide-react';
