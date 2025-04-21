@@ -4,7 +4,11 @@ import svgr from 'vite-plugin-svgr';
 import { defineConfig } from "vite"
 
 export default defineConfig({
-  plugins: [react(), svgr()],
+  plugins: [react(/*{
+	babel: {
+		plugins: ["babel-plugin-react-compiler"]
+	}
+  }*/), svgr()],
   build: {
 	sourcemap: false,
   },
