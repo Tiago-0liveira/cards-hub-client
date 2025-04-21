@@ -16,21 +16,28 @@
 		- [x] adicionar rank
 	- [x] adicionar icon para o rei da sala
 	- [x] adicionar ranks na playerList
-	- [ ] adicionar stats em cada player tipo o numero de vezes que ficaram em cada posiçao
 	- [x] animaçao joker
+	- [x] ** dar shuffle mais vezes
+
 	- [ ] mostrar baralhos no fim do jogo
+	- [ ] se o jogador nao tiver como assistir a jogada da skip automaticamente passado x(random) segundos
+		- [ ] criar uma caixinha com varias opçoes deste genero para ativar e desativar as opçoes
+
+	(Big one)
+	- [ ] adicionar stats em cada player tipo o numero de vezes que ficaram em cada posiçao
 	- [ ] stats:
 		- [ ] adicionar rank por pontos depois de acabar cada jogo
 		- [ ] adicionar rank por carta e fazer um average para saber quem é o mais sortudo
 		- [ ] adicionar valor ao baralho
-	- [x] ** dar shuffle mais vezes
-	- fazer um modo diferente de jogar as cartas:
+
+
+	- [] (big update) fazer um modo diferente de jogar as cartas:
 		- [ ] se começarem por jogar uma carta so seleciona uma
 
 fix:
 	- [x] [muito grave] quase no fim do jogo ficaram 2 players a jogar e depois os ranks bugaram quando acabou (o bug acontece porque quando alguem acaba o jogo com um joker fica com o state playing (acho eu))
-	- [ ] [grave] se toda a gente passar e lastPlayer n estiver definido o servidor crasha 
-	- [ ] (weird, need more info about it) reorganizar erro Olho.js:76
-	- [ ] [grave] onUserJoin reorganizar nao esta bem (testar o leaving tb)
-	- [ ] o som ta bugado
-	- [ ] fazer ultimas traduçoes que faltam
+	- [x] [grave] se toda a gente passar e lastPlayer n estiver definido o servidor crasha 
+	- [x] (weird, need more info about it) reorganizar erro Olho.js:76
+	- [x] [grave] onUserJoin reorganizar nao esta bem (testar o leaving tb)
+	- [x] o som ta bugado
+	- [x] fazer ultimas traduçoes que faltam
