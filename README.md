@@ -1,50 +1,56 @@
-# React + TypeScript + Vite
+# 🎴 Cards Hub (Client Only)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Cards Hub Client** is the frontend application for **Cards Hub**, an online platform for playing a variety of card games with friends or other players worldwide — all from your browser.
 
-Currently, two official plugins are available:
+> This requires the [backend](https://github.com/Tiago-0liveira/cards-hub-server/) running to fully work
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+![Cards Hub Screenshot](https://github.com/user-attachments/assets/66e18a48-3f76-4fb2-84d6-0122f95ae767)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-- Configure the top-level `parserOptions` property like this:
+---
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🌟 Features
+
+- 🕹️ Play a variety of card games online (for now just one game is available)
+- 👥 Real-time multiplayer support via WebSockets
+- 🎨 Responsive and interactive UI optimized for desktop
+- 🚪 Create or join game rooms with unique names
+- 🚀 Fast and smooth gameplay experience
+
+---
+
+## 🔧 Tech Stack
+
+- React — UI library
+- React Router — Client-side routing
+- Socket.io — Real-time multiplayer communication
+- Tailwind CSS — Modern styling
+- Vite — Bundler for fast builds and dev server
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v14+)
+- npm or anything you want
+
+### Installation
+
+```bash
+git clone https://github.com/Tiago-0liveira/cards-hub-client.git
+cd cards-hub-client
+npm install
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+#### Create a `.env`
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```env
+VITE_SERVER_ENDPOINT=http://localhost:3000
+```
+#### Start dev server
+```bash
+npm run dev
 ```
